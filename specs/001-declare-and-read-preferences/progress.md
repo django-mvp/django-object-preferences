@@ -89,3 +89,10 @@ Did: PreferenceGroup.to_stored and RecordPreferences.apply with tests.
 Verified: uv run pytest tests/test_fields.py tests/test_registry.py, 73 passed; pre-commit and mypy clean.
 Next: T013 change.
 Watch: the two save-and-reload tests call record.save(), since preferences.save() is T014.
+
+## 2026-10-15T11:25:00Z · Implementer US3 · T013
+
+Did: RecordPreferences.change with tests.
+Verified: uv run pytest tests/test_fields.py, 53 passed; pre-commit and mypy clean.
+Next: T014 save.
+Watch: none.

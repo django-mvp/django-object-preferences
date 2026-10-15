@@ -110,6 +110,37 @@ class RecordPreferences(Mapping[str, Mapping[str, Any]]):
             changed.pop(name, None)
         setattr(self.record, self.field.attname, changed)
 
+    def change(self, name: str, /, **values: Any) -> None:
+        """Change some of one group's preferences, keeping the rest as they are.
+
+        The values are validated by the group's form. The record is changed in
+        memory only.
+
+        Args:
+            name: The group's name.
+            **values: The new value of each preference to change, by name.
+
+        Raises:
+            KeyError: If no group of that name is declared for the record's
+                model, or a value names a preference the group does not declare.
+            ValidationError: If the form does not accept a value.
+        """
+        group = registry.get_group(type(self.record), name)
+        fields = group.form_class().fields
+        unknown = [key for key in values if key not in fields]
+        if unknown:
+            raise KeyError(
+                f"No preference {', '.join(map(repr, unknown))} is declared in "
+                f"group {name!r} of {type(self.record)._meta.label}."
+            )
+        data = {**self[name], **values}
+        self.apply(
+            name,
+            self.get_form(
+                name, data={key: fields[key].prepare_value(data[key]) for key in fields}
+            ),
+        )
+
     def __iter__(self) -> Iterator[str]:
         """Iterate over the names of the groups declared for the record's model."""
         return iter(group.name for group in registry.get_groups(type(self.record)))

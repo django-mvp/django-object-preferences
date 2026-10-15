@@ -294,8 +294,19 @@
         },
         {
           "id": "T013",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_changing_one_preference_keeps_the_groups_others,tests/test_fields.py::TestRecordPreferences::test_changing_an_undeclared_preference_is_a_key_error_naming_it,tests/test_fields.py::TestRecordPreferences::test_a_preference_called_name_can_be_changed"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -q"
+            ],
+            "code": [
+              "object_preferences/fields.py:109"
+            ]
+          }
         },
         {
           "id": "T014",

@@ -88,6 +88,10 @@ class NotesForm(forms.Form):
     notes = forms.JSONField(required=False)
 
 
+class NamedForm(forms.Form):
+    name = forms.CharField(initial="unnamed")
+
+
 class ConsistentForm(forms.Form):
     low = forms.IntegerField(initial=1)
     high = forms.IntegerField(initial=10)
@@ -420,3 +424,70 @@ class TestRecordPreferences:
 
         reloaded = Project.objects.get(pk=project.pk)
         assert reloaded.preferences["notes"]["notes"] == "hello"
+
+    def test_changing_one_preference_keeps_the_groups_others(self, project) -> None:
+        project.preferences = {"display": {"theme": "dark"}}
+
+        project.preferences.change("display", page_size=50)
+
+        assert project.preferences["display"] == {
+            "theme": "dark",
+            "page_size": 50,
+            "show_archived": False,
+        }
+        assert project.preferences.stored == {
+            "display": {"theme": "dark", "page_size": 50}
+        }
+
+    def test_changing_typed_preferences_stores_them_as_json(self, project) -> None:
+        project.preferences.change("typed", budget=decimal.Decimal("3.25"))
+        project.save()
+
+        typed = Project.objects.get(pk=project.pk).preferences["typed"]
+        assert typed["budget"] == decimal.Decimal("3.25")
+        assert typed["start_date"] == datetime.date(2026, 1, 1)
+
+    def test_changing_a_preference_back_to_its_default_stores_nothing(
+        self, project
+    ) -> None:
+        project.preferences = {"display": {"theme": "dark"}}
+
+        project.preferences.change("display", theme="light")
+
+        assert project.preferences.stored == {}
+
+    def test_changing_an_undeclared_preference_is_a_key_error_naming_it(
+        self, project
+    ) -> None:
+        with pytest.raises(KeyError, match="missing"):
+            project.preferences.change("display", theme="dark", missing=1)
+
+    def test_a_failed_change_leaves_the_stored_dictionary_unchanged(
+        self, project
+    ) -> None:
+        with pytest.raises(KeyError):
+            project.preferences.change("display", theme="dark", missing=1)
+
+        assert project.preferences.stored == {}
+
+    def test_a_value_the_form_rejects_raises_and_changes_nothing(self, project) -> None:
+        with pytest.raises(ValidationError) as raised:
+            project.preferences.change("display", page_size=3)
+
+        assert [e.code for e in raised.value.error_dict["page_size"]] == ["min_value"]
+        assert project.preferences.stored == {}
+
+    def test_changing_in_an_undeclared_group_is_a_key_error_naming_it(
+        self, project
+    ) -> None:
+        with pytest.raises(KeyError, match="missing"):
+            project.preferences.change("missing", theme="dark")
+
+    def test_a_preference_called_name_can_be_changed(
+        self, project, preference_registry
+    ) -> None:
+        registry.register(Project, "identity", NamedForm)
+
+        project.preferences.change("identity", name="Atlas")
+
+        assert project.preferences["identity"]["name"] == "Atlas"
