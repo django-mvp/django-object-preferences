@@ -2,7 +2,7 @@
   "feature": "002-preferences-page",
   "branch": "002-preferences-page",
   "repo": "django-mvp/django-object-preferences",
-  "state": "IMPLEMENT",
+  "state": "CONVERGE",
   "state_history": [
     {
       "state": "QUEUED",
@@ -23,6 +23,11 @@
       "state": "IMPLEMENT",
       "at": "2026-10-15T12:16:15Z",
       "note": "design review applied (D12-D14, T002); plan gate open, plan comment posted on #10"
+    },
+    {
+      "state": "CONVERGE",
+      "at": "2026-10-15T12:31:14Z",
+      "note": "all three stories done"
     }
   ],
   "gates": {
@@ -209,7 +214,7 @@
       "priority": "P2",
       "issue": 17,
       "worktree": null,
-      "status": "todo",
+      "status": "done",
       "replans": 0,
       "tasks": [
         {
@@ -249,7 +254,7 @@
   ],
   "budgets": {
     "converge_cycles": {
-      "used": 0,
+      "used": 1,
       "max": 2
     },
     "review_cycles": {
