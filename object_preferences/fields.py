@@ -5,6 +5,7 @@ from types import MappingProxyType
 from typing import Any
 
 from django import forms
+from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.db.models.query_utils import DeferredAttribute
@@ -75,6 +76,39 @@ class RecordPreferences(Mapping[str, Mapping[str, Any]]):
         group = registry.get_group(type(self.record), name)
         initial = {**self[name], **kwargs.pop("initial", {})}
         return group.form_class(data=data, initial=initial, **kwargs)
+
+    def apply(self, name: str, form: forms.BaseForm) -> None:
+        """Replace one group's stored values with those of a submitted form.
+
+        The record is changed in memory only. Other groups' stored values are
+        left as they are, and so is every stored value of this group that the
+        form does not declare.
+
+        Args:
+            name: The group's name.
+            form: A bound form of the group's form class.
+
+        Raises:
+            KeyError: If no group of that name is declared for the record's model.
+            TypeError: If the form is not an instance of the group's form class.
+            ValidationError: If the form is not valid, with the form's errors.
+        """
+        group = registry.get_group(type(self.record), name)
+        if not isinstance(form, group.form_class):
+            raise TypeError(
+                f"Expected a {group.form_class.__name__} for group {name!r}, "
+                f"not a {type(form).__name__}."
+            )
+        if not form.is_valid():
+            raise ValidationError(form.errors.as_data())
+        stored = self.stored
+        changed = dict(stored) if isinstance(stored, dict) else {}
+        values = group.to_stored(form, self.field.encoder)
+        if values:
+            changed[name] = values
+        else:
+            changed.pop(name, None)
+        setattr(self.record, self.field.attname, changed)
 
     def __iter__(self) -> Iterator[str]:
         """Iterate over the names of the groups declared for the record's model."""

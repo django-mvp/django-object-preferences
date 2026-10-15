@@ -1,11 +1,13 @@
 """PreferencesField and the accessor its descriptor returns."""
 
 import datetime
+import decimal
 from types import MappingProxyType
 
 import pytest
 from django import forms
 from django.apps import apps
+from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.core.management import call_command
 from django.db.migrations.autodetector import MigrationAutodetector
 from django.db.migrations.graph import MigrationGraph
@@ -80,6 +82,21 @@ class ChangedDisplayForm(forms.Form):
     )
     page_size = forms.IntegerField(initial=50)
     show_archived = forms.BooleanField(required=False)
+
+
+class NotesForm(forms.Form):
+    notes = forms.JSONField(required=False)
+
+
+class ConsistentForm(forms.Form):
+    low = forms.IntegerField(initial=1)
+    high = forms.IntegerField(initial=10)
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned["low"] > cleaned["high"]:
+            raise forms.ValidationError("Low is above high.", code="inverted")
+        return cleaned
 
 
 class TestRecordPreferences:
@@ -251,3 +268,155 @@ class TestRecordPreferences:
     ) -> None:
         with pytest.raises(KeyError, match="missing"):
             project.preferences.get_form("missing")
+
+    def test_applied_values_read_back_typed_after_a_save_and_reload(
+        self, project
+    ) -> None:
+        data = {
+            "start_date": "2026-03-04",
+            "reminder_time": "08:15",
+            "budget": "12.75",
+        }
+        project.preferences.apply("typed", project.preferences.get_form("typed", data))
+        project.save()
+
+        typed = Project.objects.get(pk=project.pk).preferences["typed"]
+        assert typed["start_date"] == datetime.date(2026, 3, 4)
+        assert typed["reminder_time"] == datetime.time(8, 15)
+        assert typed["budget"] == decimal.Decimal("12.75")
+
+    def test_applying_stores_only_values_that_differ_from_their_default(
+        self, project
+    ) -> None:
+        data = {"theme": "dark", "page_size": "25"}
+
+        project.preferences.apply(
+            "display", project.preferences.get_form("display", data)
+        )
+
+        assert project.preferences.stored == {"display": {"theme": "dark"}}
+
+    def test_applying_a_default_removes_the_stored_value_and_the_group(
+        self, project
+    ) -> None:
+        project.preferences = {"display": {"theme": "dark"}}
+        data = {"theme": "light", "page_size": "25"}
+
+        project.preferences.apply(
+            "display", project.preferences.get_form("display", data)
+        )
+
+        assert project.preferences.stored == {}
+
+    def test_a_default_that_changes_later_reaches_a_record_that_applied_it(
+        self, project, preference_registry
+    ) -> None:
+        data = {"theme": "light", "page_size": "25"}
+        project.preferences.apply(
+            "display", project.preferences.get_form("display", data)
+        )
+        del registry.declarations[Project]["display"]
+        registry.register(Project, "display", ChangedDisplayForm)
+
+        assert project.preferences["display"]["theme"] == "dark"
+
+    def test_an_invalid_form_raises_with_the_field_and_its_code(self, project) -> None:
+        form = project.preferences.get_form(
+            "display", {"theme": "dark", "page_size": "3"}
+        )
+
+        with pytest.raises(ValidationError) as raised:
+            project.preferences.apply("display", form)
+
+        assert [e.code for e in raised.value.error_dict["page_size"]] == ["min_value"]
+
+    def test_an_invalid_form_leaves_the_stored_dictionary_unchanged(
+        self, project
+    ) -> None:
+        project.preferences = {"display": {"page_size": 40}}
+        form = project.preferences.get_form(
+            "display", {"theme": "dark", "page_size": "3"}
+        )
+
+        with pytest.raises(ValidationError):
+            project.preferences.apply("display", form)
+
+        assert project.preferences.stored == {"display": {"page_size": 40}}
+
+    def test_an_error_from_the_forms_own_clean_is_not_tied_to_a_field(
+        self, project, preference_registry
+    ) -> None:
+        registry.register(Project, "range", ConsistentForm)
+        form = project.preferences.get_form("range", {"low": "5", "high": "2"})
+
+        with pytest.raises(ValidationError) as raised:
+            project.preferences.apply("range", form)
+
+        codes = [e.code for e in raised.value.error_dict[NON_FIELD_ERRORS]]
+        assert codes == ["inverted"]
+
+    def test_a_form_of_another_class_is_a_type_error(self, project) -> None:
+        form = ChangedDisplayForm({"theme": "dark", "page_size": "50"})
+
+        with pytest.raises(TypeError):
+            project.preferences.apply("display", form)
+
+    def test_applying_to_an_undeclared_group_is_a_key_error_naming_it(
+        self, project
+    ) -> None:
+        form = project.preferences.get_form("display")
+
+        with pytest.raises(KeyError, match="missing"):
+            project.preferences.apply("missing", form)
+
+    def test_applying_one_group_leaves_the_others_stored_values(self, project) -> None:
+        project.preferences = {
+            "typed": {"budget": "1.00"},
+            "retired": {"colour": "red"},
+        }
+        data = {"theme": "dark", "page_size": "25"}
+
+        project.preferences.apply(
+            "display", project.preferences.get_form("display", data)
+        )
+
+        assert project.preferences.stored == {
+            "typed": {"budget": "1.00"},
+            "retired": {"colour": "red"},
+            "display": {"theme": "dark"},
+        }
+
+    def test_applying_a_group_drops_a_stored_key_it_does_not_declare(
+        self, project
+    ) -> None:
+        project.preferences = {"display": {"theme": "dark", "retired": 1}}
+        data = {"theme": "dark", "page_size": "25"}
+
+        project.preferences.apply(
+            "display", project.preferences.get_form("display", data)
+        )
+
+        assert project.preferences.stored == {"display": {"theme": "dark"}}
+
+    def test_applying_does_not_change_the_dictionary_it_replaces(self, project) -> None:
+        before = project.preferences.stored
+        data = {"theme": "dark", "page_size": "25"}
+
+        project.preferences.apply(
+            "display", project.preferences.get_form("display", data)
+        )
+
+        assert before == {}
+        assert project.preferences.stored is not before
+
+    def test_a_json_preference_set_to_a_string_survives_a_save_and_reload(
+        self, project, preference_registry
+    ) -> None:
+        registry.register(Project, "notes", NotesForm)
+        form = project.preferences.get_form("notes", {"notes": '"hello"'})
+
+        project.preferences.apply("notes", form)
+        project.save()
+
+        reloaded = Project.objects.get(pk=project.pk)
+        assert reloaded.preferences["notes"]["notes"] == "hello"

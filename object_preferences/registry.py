@@ -1,5 +1,6 @@
 """Preference groups and the registry that holds them."""
 
+import json
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
@@ -75,6 +76,32 @@ class PreferenceGroup:
             if name in stored:
                 values[name] = field.clean(stored[name])
         return values
+
+    def to_stored(
+        self, form: forms.BaseForm, encoder: type[json.JSONEncoder] | None
+    ) -> dict[str, Any]:
+        """Return what a valid form of the group leaves stored on a record.
+
+        Only values that differ from their default are kept, in the form the
+        database returns them, so that the record reads the same before and
+        after it is saved.
+
+        Args:
+            form: A valid form of the group.
+            encoder: The JSON encoder of the record's preferences field.
+
+        Returns:
+            The values to store, by preference name.
+        """
+        defaults = self.defaults(self.form_class())
+        stored = {}
+        for name, field in form.fields.items():
+            value = form.cleaned_data[name]
+            if value != defaults[name]:
+                stored[name] = json.loads(
+                    json.dumps(field.prepare_value(value), cls=encoder)
+                )
+        return stored
 
 
 class PreferenceRegistry:

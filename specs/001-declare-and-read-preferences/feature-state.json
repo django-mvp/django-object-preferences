@@ -278,8 +278,19 @@
         },
         {
           "id": "T012",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_applied_values_read_back_typed_after_a_save_and_reload,tests/test_fields.py::TestRecordPreferences::test_applying_a_default_removes_the_stored_value_and_the_group,tests/test_fields.py::TestRecordPreferences::test_an_invalid_form_raises_with_the_field_and_its_code,tests/test_fields.py::TestRecordPreferences::test_a_json_preference_set_to_a_string_survives_a_save_and_reload"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py tests/test_registry.py -q"
+            ],
+            "code": [
+              "object_preferences/registry.py:80"
+            ]
+          }
         },
         {
           "id": "T013",
