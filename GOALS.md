@@ -16,10 +16,10 @@ Importance is a tag on each goal, not a ranking:
 
 | ID | Goal | Importance | Status | Notes |
 |----|------|------------|--------|-------|
-| G1 | Any installed app can give any model its own preferences, without adding a model, a table or a migration of its own | Essential | | |
+| G1 | Once a model carries preferences, any installed app can add its own to it without a new model, table or migration | Essential | | |
 | G2 | Reading a record's preferences costs nothing beyond loading the record | Essential | | |
 | G3 | A preference nobody has changed always reads its current default, and stored values that no longer fit never break a page | Essential | | |
-| G4 | People can change a record's preferences on a page, while the host project decides who may | Essential | | |
+| G4 | People can change a record's preferences on a page, while the host project decides who has permission | Essential | | |
 | G5 | Preferences declared for a model reach the models that inherit from it | Expected | | |
 | G6 | Works in any Django project without a user interface package, and its page is simple for one to restyle | Expected | | |
 

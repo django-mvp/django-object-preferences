@@ -45,13 +45,13 @@ Serves G1, G2 and G3. Out of scope: any page or view, and model inheritance beyo
 
 *feature · advances G4, G6*
 
-Once preferences can be declared and read, people need somewhere to change them. This item gives every record a page listing the preference groups declared for its model, with the host project deciding where that page lives and who may use it. It also gives a signed-in person a page for their own preferences, which is the case nearly every host project has first.
+Once preferences can be declared and read, people need somewhere to change them. This item gives every record a page listing the preference groups declared for its model, with the host project deciding where that page lives and who has permission to use it.
 
 **Deliverables:**
 
 - An editing page for one record that shows every preference group declared for its model and saves changes with full validation.
-- The host project decides who may open the page for a given record, using Django's ordinary permission tools.
-- A ready-to-mount page where a signed-in person changes their own preferences.
+- The host project decides who has permission to open the page for a given record, using Django's ordinary permission tools.
+- Documentation showing a host project pointing the page at the signed-in person, so people can change their own preferences.
 - Plain, accessible markup that works in any Django project without a user interface package.
 
 Serves G4 and G6. Out of scope: styling for any particular user interface package, and admin integration.
