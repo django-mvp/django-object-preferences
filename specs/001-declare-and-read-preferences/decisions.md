@@ -151,3 +151,98 @@ Two saves of the same record's preferences at the same moment are not merged, an
 wins, even when they change different groups. This is how saving any Django field behaves. It is
 left as a risk rather than a requirement because preferences change rarely and usually by the
 person the record belongs to. Planning may choose a cheap guard if one exists.
+
+## Decisions made while planning
+
+The plan was reviewed once before any code was written. Its verdict was to approve, with one
+medium and four low findings. Each one below was applied to the plan. None changes a
+requirement.
+
+## D1 — Fields entered as several inputs are refused, alongside related-record and upload fields
+
+**Decision**: registering a group whose form has a `forms.MultiValueField`, such as
+`SplitDateTimeField`, fails at start-up with the same kind of error as a model choice field or a
+file field. The form's fields are read from an instance of the form, so a field added in its
+`__init__` is checked too.
+
+**Why**: such a field takes its value as a list of inputs (`when_0`, `when_1`) and cleans it from
+a list. A value stored on the record would never clean back, so it would always read as the
+default. Worse, a change to another preference in the same group would bind the form with that
+value under the wrong key and silently drop it. Refusing it at start-up puts the error in front of
+the developer. The spec's examples of supported fields (text, numbers, booleans, choices, dates,
+times, decimals, durations, UUIDs) are all single-input fields, and a date and a time can each be
+a preference of their own.
+
+**Revisit if**: someone needs a combined date and time preference. A `DateTimeField` already
+covers it with one input.
+
+**ADR:** none — a narrowing of which form fields are accepted, recorded in the README and in the
+error itself
+
+## D2 — Values are stored as the form field would render them
+
+**Decision**: a changed value is stored as the field's `prepare_value()` gives it, then encoded
+with `DjangoJSONEncoder`. A change from code binds the form with the same rendering of each current
+value.
+
+**Why**: reading a value back runs it through the field's `clean()`, which takes a value in the
+shape a form submission has. For most fields that is the value itself. For `forms.JSONField` it is
+JSON text: a string value stored as-is would be parsed as JSON on read and fall back to the
+default. `prepare_value()` is the field's own answer to "what does my value look like as form
+data", so using it keeps one rule for every field instead of a special case.
+
+**Revisit if**: a field's `prepare_value()` turns out to return something that is not valid input
+to its own `clean()`.
+
+**ADR:** none — an internal detail of how values are stored, invisible to a host project
+
+## D3 — The group name is positional-only
+
+**Decision**: `change(name, /, **values)` and `get_form(name, /, data=None, **kwargs)`.
+
+**Why**: without it, a preference called `name` cannot be changed, because the keyword binds to
+the group parameter and Python raises `TypeError`. Any field name is a valid preference name.
+
+**Revisit if**: never, short of a change to Python.
+
+**ADR:** none — a signature detail visible in the API documentation
+
+## D4 — The registry finds a model's preferences field
+
+**Decision**: `PreferenceRegistry.get_field(model)` returns the model's `PreferencesField` and
+raises `ImproperlyConfigured` when the model has none or more than one. Registration uses it.
+
+**Why**: the check had to exist for registration anyway. Naming it gives the editing page (FS-002)
+one way to find the field, whatever the host called it, and to refuse a model without
+preferences, instead of repeating the scan. Two preferences fields on one model would give two
+accessors over the same groups with separate storage, which no host means to set up.
+
+**Revisit if**: a real need for two separate sets of groups on one model appears.
+
+**ADR:** none — follows from the registration design already recorded above
+
+## D5 — The package ships an English catalogue
+
+**Decision**: `object_preferences/locale/en/LC_MESSAGES/django.po` is generated with
+`makemessages` and ships with the package.
+
+**Why**: Constitution Article VIII. The field's `verbose_name` and `help_text` are user-facing
+wherever a host shows its model's fields.
+
+**Revisit if**: the package stops carrying user-facing strings.
+
+**ADR:** none — required by the constitution, nothing to decide
+
+## Design review watch items
+
+Carried into the implementation briefs rather than re-planned:
+
+- The `preference_registry` fixture copies each inner dictionary, so one test's registration
+  cannot leak into the next.
+- A required field with no initial value reads as empty and makes every change to its group fail
+  until it is given a value. That is how the form behaves on a page too. The README says so in one
+  sentence.
+- The example project's settings carry a development-only secret key and `ALLOWED_HOSTS = ["*"]`,
+  each with a comment saying it only ever runs locally.
+- Messages raised for developer mistakes (`ImproperlyConfigured`, `KeyError`) are not translated.
+  Article VIII covers user-facing strings, and these are developer-facing.

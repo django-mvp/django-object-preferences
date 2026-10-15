@@ -2,7 +2,7 @@
   "feature": "001-declare-and-read-preferences",
   "branch": "001-declare-and-read-preferences",
   "repo": "django-mvp/django-object-preferences",
-  "state": "PLAN",
+  "state": "IMPLEMENT",
   "state_history": [
     {
       "state": "QUEUED",
@@ -13,6 +13,16 @@
       "state": "PLAN",
       "at": "2026-10-15T10:55:22Z",
       "note": "picked up from the queue on branch 001-declare-and-read-preferences, up to date with origin/main 9dc15d8; base suite green (1 test)"
+    },
+    {
+      "state": "DESIGN_REVIEW",
+      "at": "2026-10-15T10:55:37Z",
+      "note": "plan, research and tasks committed at 169b578"
+    },
+    {
+      "state": "IMPLEMENT",
+      "at": "2026-10-15T11:09:48Z",
+      "note": "design review applied (D1-D5); plan gate open, plan comment posted on #9"
     }
   ],
   "gates": {
@@ -24,12 +34,27 @@
       ]
     },
     "plan": {
-      "approved_by": null,
-      "at": null
+      "approved_by": "open",
+      "at": "2026-10-15T11:09:29Z",
+      "self_resolved": [
+        "plan gate open by default; plan comment posted on #9"
+      ]
     },
     "merge": {
       "approved_by": null,
       "at": null
+    },
+    "design_review": {
+      "approved_by": "design reviewer (one round)",
+      "at": "2026-10-15T11:08:30Z",
+      "self_resolved": [
+        "DR-001 medium: MultiValueField refused at registration, fields read from a form instance (D1)",
+        "DR-002 low: group name positional-only in change() and get_form() (D3)",
+        "DR-003 low: registration checks form_class().fields, not base_fields (D1)",
+        "DR-004 low: PreferenceRegistry.get_field(model) named and reused (D4)",
+        "DR-005 low: English catalogue added to T005 (D5)",
+        "forms.JSONField string values: stored through prepare_value() (D2)"
+      ]
     }
   },
   "stories": [
@@ -183,7 +208,7 @@
       "max": 120
     },
     "design_review_cycles": {
-      "used": 0,
+      "used": 1,
       "max": 1
     }
   },

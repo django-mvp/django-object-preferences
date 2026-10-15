@@ -52,7 +52,7 @@ no compatibility aliases, no tests of wording or layout.
 | V Security | No rendered output in the package. Stored data is treated as untrusted on read and never raises (FR-016, FR-017) |
 | VI Documentation | README usage section and CHANGELOG in this pull request, each story documenting the names it introduces |
 | VII Dependencies | None added. `example/` is excluded from deptry, as in django-flex-menus |
-| VIII Internationalisation | The field's `verbose_name` and `help_text` and every `ImproperlyConfigured` message use `gettext_lazy` or `gettext` |
+| VIII Internationalisation | The field's `verbose_name` and `help_text` use `gettext_lazy`, and the package ships an English catalogue (D5). Errors for developer mistakes are not user-facing and stay untranslated |
 | IX Data model | The field supplies `verbose_name` and `help_text` and is deliberately unindexed: preferences have no query path (Article XII). The package ships no migration. The test app's migration and the example's are one file each |
 | X Cohesion | Registration lives on `PreferenceRegistry`, a group's reading and storing on `PreferenceGroup`, a record's on `RecordPreferences`. `register` is a thin wrapper over the registry |
 | XI Compatibility | First public API, recorded under Unreleased |
@@ -77,9 +77,9 @@ class RecordPreferences(Mapping[str, Mapping[str, Any]]):
     stored -> Any                    # property: the record's stored dictionary, as stored
     __getitem__(name) -> Mapping     # one group's values, read-only; KeyError if undeclared
     __iter__() / __len__()           # the names of the groups declared for the record's model
-    get_form(name, data=None, **kwargs) -> forms.Form
+    get_form(name, /, data=None, **kwargs) -> forms.Form
     apply(name, form) -> None        # ValidationError if invalid, TypeError if wrong form
-    change(name, **values) -> None   # KeyError for an undeclared preference
+    change(name, /, **values) -> None  # KeyError for an undeclared preference
     save() -> None                   # record.save(update_fields=[field.attname])
 
 # object_preferences/registry.py
@@ -95,6 +95,7 @@ class PreferenceGroup:
 class PreferenceRegistry:
     declarations: dict[type[models.Model], dict[str, PreferenceGroup]]
     register(model, name, form_class) -> PreferenceGroup   # ImproperlyConfigured on a mistake
+    get_field(model) -> PreferencesField                    # ImproperlyConfigured unless exactly one
     get_groups(model) -> list[PreferenceGroup]              # in registration order
     get_group(model, name) -> PreferenceGroup               # KeyError if undeclared
 
@@ -123,11 +124,16 @@ and `object_preferences.registry`, which is where a Django developer reading the
 
 ### Registration (`registry.py` and `apps.py`, US2)
 
-- `PreferenceRegistry.register()` raises `ImproperlyConfigured` for a duplicate name on a model,
-  a model without a `PreferencesField` among `model._meta.get_fields()`, and a form whose
-  `base_fields` hold a `forms.ModelChoiceField` or `forms.FileField`. Each message names what is
-  wrong and where (`research.md` §3). It imports `PreferencesField` inside the method, with a
+- `PreferenceRegistry.get_field(model)` returns the model's one `PreferencesField` from
+  `model._meta.get_fields()`, and raises `ImproperlyConfigured` naming the model when it has none
+  or more than one. `register()` calls it, and FS-002's page reuses it to find the field and to
+  refuse a model without preferences. It imports `PreferencesField` inside the method, with a
   comment, because `fields.py` imports this module.
+- `PreferenceRegistry.register()` raises `ImproperlyConfigured` for a duplicate name on a model,
+  for whatever `get_field()` raises, and for a form whose fields, read from an instance
+  `form_class().fields` so that fields added in `__init__` are seen, include a
+  `forms.ModelChoiceField`, a `forms.FileField` or a `forms.MultiValueField`. Each message names
+  what is wrong and where (`research.md` §3, `decisions.md` D1).
 - `get_group()` raises `KeyError` naming the group and the model, `app_label.ModelName`.
 - `ObjectPreferencesConfig.ready()` calls `autodiscover_modules("preferences")`.
 
@@ -148,19 +154,23 @@ and `object_preferences.registry`, which is where a Django developer reading the
 
 ### Changing (`registry.py` and `fields.py`, US3)
 
-- `RecordPreferences.get_form(name, data=None, **kwargs)`: `form_class(data=data,
+- `RecordPreferences.get_form(name, /, data=None, **kwargs)`: `form_class(data=data,
   initial=dict(self[name]), **kwargs)`, with an `initial` the caller passes laid over the current
   values. Unbound when `data` is `None`.
 - `PreferenceGroup.to_stored(form, encoder)`: from `form.cleaned_data`, only the group's declared
   fields, only values that differ from `defaults()` of a fresh `form_class()`, each passed through
-  `json.loads(json.dumps(value, cls=encoder))` so the in-memory value equals what the database
-  will return.
+  the field's own `prepare_value()` (what the form would render it as, which turns a
+  `forms.JSONField` value into its JSON text) and then
+  `json.loads(json.dumps(value, cls=encoder))`, so the in-memory value equals what the database
+  will return and reads back through `field.clean()` (`decisions.md` D2).
 - `RecordPreferences.apply(name, form)`: `TypeError` unless `isinstance(form,
   group.form_class)`. `ValidationError(form.errors.as_data())` unless `form.is_valid()`. Then a copy
   of the stored dict (a new dict when it is not one) with `stored[name]` replaced by
   `to_stored()`, or removed when that is empty, assigned back through the descriptor.
-- `RecordPreferences.change(name, **values)`: `KeyError` for a key not in the group's form
-  fields, naming it. Otherwise `apply(name, get_form(name, data={**self[name], **values}))`.
+- `RecordPreferences.change(name, /, **values)`: `KeyError` for a key not in the group's form
+  fields, naming it. Otherwise `apply()` on `get_form()` bound to the current values with
+  `values` laid over them, each passed through its field's `prepare_value()`. The group name is
+  positional-only so a preference may itself be called `name` (`decisions.md` D3).
 - `RecordPreferences.save()`: `self.record.save(update_fields=[self.field.attname])`.
 
 ### Test layout

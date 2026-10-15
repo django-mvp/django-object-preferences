@@ -60,7 +60,7 @@ the attribute through the descriptor:
 | Method | Who calls it | Source |
 |---|---|---|
 | `get_prep_value` | `get_db_prep_value` on every save and lookup | `db/models/fields/json.py:101-103` |
-| `to_python` | `Field.clean`, before `JSONField.validate` serialises the value, so `full_clean()` works | `db/models/fields/__init__.py:798`, `json.py:128` |
+| `to_python` | `Field.clean`, before `JSONField.validate` serialises the value, so `full_clean()` works | `Field.to_python` at `db/models/fields/__init__.py:798`, `json.py:128` |
 | `value_from_object` | serialisers and `model_to_dict` | `db/models/fields/__init__.py:1191` |
 
 ## 3. How a group is declared and found
@@ -94,7 +94,13 @@ class DisplayPreferences(forms.Form):
   form classes;
 - the model has no `PreferencesField`: the error names the model and the group;
 - the form declares a `ModelChoiceField` (and so `ModelMultipleChoiceField`) or a `FileField` (and
-  so `ImageField`): the error names the group and the field.
+  so `ImageField`): the error names the group and the field;
+- the form declares a `MultiValueField`, such as `SplitDateTimeField`. Its value is entered as
+  several inputs and cleaned from a list, so a stored value would never clean back and a change to
+  another preference in the group would wipe it (design review DR-001, `decisions.md` D1).
+
+The form's fields are read from an instance, `form_class().fields`, so a field added in
+`__init__` is checked too.
 
 A system check was considered and rejected: checks run for `runserver`, `check` and `migrate` but
 not for every entry point, and they can be silenced. The spec asks for a project that refuses to
@@ -135,8 +141,11 @@ name):
 
 Probed in the installed Django, every field type the spec names round-trips through
 `DjangoJSONEncoder` and back through `field.clean()` to an equal value: date, time, duration,
-decimal, UUID, multiple choice, typed choice, boolean and `forms.JSONField`. The one loss is a
-datetime, which the encoder truncates to milliseconds. ISO dates and times parse whatever the
+decimal, UUID, multiple choice, typed choice and boolean. A datetime loses its microseconds below
+the millisecond, which the encoder truncates. A `forms.JSONField` round-trips an object, a list or a
+number but not a string, because its `clean()` parses text as JSON. Storing each value as the
+field's `prepare_value()` gives it (JSON text for a `forms.JSONField`, the value itself for the
+others) closes that gap (`decisions.md` D2). ISO dates and times parse whatever the
 active locale because `get_format` appends `ISO_INPUT_FORMATS` (`utils/formats.py:19,133`).
 
 **Stale and malformed data never raises** (FR-016, FR-017, SC-004). Cleaning a value of the wrong

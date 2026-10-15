@@ -39,7 +39,8 @@ reload records and read back what they store.
   Test: `makemigrations --check --dry-run` reports no changes for the test app.
 - [ ] T005 [US1] README: a usage section opening with turning preferences on, quoting
   `PreferencesField`, `PreferencesDescriptor` and `RecordPreferences`. CHANGELOG under
-  Unreleased.
+  Unreleased. The base English catalogue (Article VIII): `object_preferences/locale/en/
+  LC_MESSAGES/django.po` from `makemessages -l en`, run in `object_preferences/`.
 
 **Checkpoint**: the field works on its own and the suite is green.
 
@@ -57,9 +58,12 @@ count queries.
   registration is returned by `get_group()` and listed by `get_groups()` with its name and form
   class (US2-7, FR-010); `register` used as a decorator returns the form class unchanged;
   `ImproperlyConfigured` for a duplicate name on one model, for a model without the field
-  (`Plain`), for a `ModelChoiceField`, a `ModelMultipleChoiceField`, a `FileField` and an
-  `ImageField` (FR-019); `get_group()` raises `KeyError` for an undeclared name (FR-009). Also the
-  `preference_registry` fixture in `tests/conftest.py`.
+  (`Plain`), for a `ModelChoiceField`, a `ModelMultipleChoiceField`, a `FileField`, an
+  `ImageField` and a `SplitDateTimeField`, and for one added in the form's `__init__` (FR-019,
+  D1); `get_field()` returns `Project`'s field and raises `ImproperlyConfigured` for `Plain`;
+  `get_group()` raises `KeyError` for an undeclared name (FR-009). Also the
+  `preference_registry` fixture in `tests/conftest.py`, which copies each inner dict of
+  `registry.declarations` and restores them, and is how tests replace a group.
 - [ ] T007 [US2] Discovery: `ObjectPreferencesConfig.ready()` calls
   `autodiscover_modules("preferences")`. `tests/testapp/preferences.py` registers a `display` group
   for `Project` (`theme`: `ChoiceField` with an initial value; `page_size`: `IntegerField` with an
@@ -107,10 +111,11 @@ invalid value and confirm nothing changed.
   combination raises with the error under `NON_FIELD_ERRORS`; a form of another class raises
   `TypeError`; applying one group leaves another group's stored values, and a stored group that is
   no longer declared, untouched (US3-6, FR-015); a key stored under the group that the form does
-  not declare is gone after applying (FR-018).
+  not declare is gone after applying (FR-018); a `forms.JSONField` preference set to a string
+  reads back as that string after a save and reload (D2).
 - [ ] T013 [US3] `RecordPreferences.change()`. Tests: changing one preference keeps the group's
   others (US3-2, FR-012); an undeclared preference raises `KeyError` naming it, and nothing
-  changes.
+  changes; a preference called `name` can be changed (D3).
 - [ ] T014 [US3] `RecordPreferences.save()`. Tests: a change saved and reloaded reads the new value
   (US3-1); another field changed on the record but not saved is still the old value in the
   database after `save()` (US3-5, FR-015); saving a record that was never saved raises and writes
