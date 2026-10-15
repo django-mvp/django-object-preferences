@@ -78,7 +78,7 @@
     },
     "review": {
       "approved_by": "code reviewer (one round) + independent craft-review and craft-security review (approve) + fix cycles verified by Forge",
-      "at": "2026-10-15T14:30:00Z",
+      "at": "2026-10-15T12:00:20Z",
       "self_resolved": [
         "COR-001 high: cleaned value through DjangoJSONEncoder; test red when prepare_value storage restored (T024)",
         "COR-003 medium: ISO parse before clean for temporal fields; test red without it (T025)",
