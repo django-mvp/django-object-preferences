@@ -12,6 +12,11 @@ urlpatterns = [
         name="project-preferences",
     ),
     path(
+        "projects/<int:pk>/preferences/elsewhere/",
+        PreferencesView.as_view(model=Project, success_url="/done/"),
+        name="project-preferences-elsewhere",
+    ),
+    path(
         "documents/<uuid:pk>/preferences/",
         PreferencesView.as_view(model=Document),
         name="document-preferences",

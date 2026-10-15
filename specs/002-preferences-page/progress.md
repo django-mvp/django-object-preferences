@@ -12,3 +12,10 @@ Did: PreferencesView GET (get_preferences, get_forms, get_context_data), the pag
 Verified: uv run pytest tests/test_views.py (8 passed); pre-commit run --all-files passed.
 Next: T002 saving.
 Watch: Document fixture added to conftest.
+
+## 2026-10-15T12:19:28Z · Implementer US1 · T002
+
+Did: post(), forms_valid(), forms_invalid(), get_success_url(); tests for saving, all-or-nothing, clean() error, prefixes, message, no-middleware, success_url, update_fields, Document, CSRF; one extra route in tests/urls.py for success_url.
+Verified: uv run pytest tests/test_views.py (19 passed); pre-commit run --all-files passed.
+Next: T003 markup.
+Watch: the CSRF and unchanged-page tests passed on first run (csrf_protect was already on the class from T001; an unchanged page stores nothing with no code to do it).

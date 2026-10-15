@@ -2,7 +2,9 @@
 
 from typing import Any
 
+from django.contrib import messages
 from django.forms import BaseForm
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_protect
@@ -68,3 +70,59 @@ class PreferencesView(DetailView):
         if "forms" not in kwargs:
             kwargs["forms"] = self.get_forms()
         return super().get_context_data(**kwargs)
+
+    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        """Validate every group's form, then save them all or none.
+
+        Args:
+            request: The request, whose POST data holds every group's values.
+            *args: Positional arguments from the URL.
+            **kwargs: Keyword arguments from the URL.
+
+        Returns:
+            A redirect when every group is valid, else the page with the errors.
+        """
+        self.object = self.get_object()
+        forms = self.get_forms(data=request.POST)
+        # A list, so that every form is validated and every error is shown.
+        results = [form.is_valid() for form in forms.values()]
+        if all(results):
+            return self.forms_valid(forms)
+        return self.forms_invalid(forms)
+
+    def forms_valid(self, forms: dict[str, BaseForm]) -> HttpResponse:
+        """Apply every group's form to the record, save once and redirect.
+
+        Args:
+            forms: Each group's valid form by group name.
+
+        Returns:
+            A redirect to the success URL.
+        """
+        preferences = self.get_preferences()
+        for name, form in forms.items():
+            preferences.apply(name, form)
+        preferences.save()
+        messages.success(self.request, self.success_message, fail_silently=True)
+        return HttpResponseRedirect(self.get_success_url())
+
+    def forms_invalid(self, forms: dict[str, BaseForm]) -> HttpResponse:
+        """Show the page again with the forms and their errors.
+
+        Args:
+            forms: Each group's bound form by group name.
+
+        Returns:
+            The rendered page.
+        """
+        return self.render_to_response(self.get_context_data(forms=forms))
+
+    def get_success_url(self) -> str:
+        """Send the person to ``success_url``, or back to this page.
+
+        Returns:
+            The URL to redirect to after a save.
+        """
+        if self.success_url:
+            return str(self.success_url)
+        return self.request.path

@@ -82,8 +82,19 @@
         },
         {
           "id": "T002",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 2,
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestPreferencesViewSaving"
+            ],
+            "commands": [
+              "uv run pytest tests/test_views.py"
+            ],
+            "code": [
+              "object_preferences/views.py:78"
+            ]
+          }
         },
         {
           "id": "T003",
