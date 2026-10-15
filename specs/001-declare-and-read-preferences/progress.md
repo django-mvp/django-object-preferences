@@ -26,3 +26,10 @@ Did: RecordPreferences (record, field, stored), PreferencesDescriptor, the three
 Verified: uv run pytest tests/test_fields.py -q, 14 passed; mutation probe of each unwrapping method: get_prep_value and to_python and value_from_object each fail a test when removed; pre-commit and mypy clean.
 Next: T004 migration.
 Watch: none.
+
+## 2026-10-15T11:14:38Z · Implementer US1 · T004
+
+Did: generated tests/testapp/migrations/0001_initial.py with makemigrations; added the makemigrations --check --dry-run test. Wrote the migration before the test, then moved it away to observe the test red (SystemExit 1) and restored it.
+Verified: uv run pytest tests/test_fields.py -q, 15 passed; pre-commit clean.
+Next: T005 README, CHANGELOG, catalogue.
+Watch: none.

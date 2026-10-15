@@ -116,8 +116,19 @@
         },
         {
           "id": "T004",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 2,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestPreferencesField::test_the_test_app_migration_leaves_no_changes_to_make"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -q"
+            ],
+            "code": [
+              "tests/testapp/migrations/0001_initial.py:8"
+            ]
+          }
         },
         {
           "id": "T005",

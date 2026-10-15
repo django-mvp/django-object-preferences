@@ -1,7 +1,9 @@
 """PreferencesField and the accessor its descriptor returns."""
 
+import pytest
 from django import forms
 from django.apps import apps
+from django.core.management import call_command
 from django.db.migrations.autodetector import MigrationAutodetector
 from django.db.migrations.graph import MigrationGraph
 from django.db.migrations.state import ProjectState
@@ -39,6 +41,12 @@ class TestPreferencesField:
         assert [(type(op).__name__, op.model_name) for op in operations] == [
             ("AddField", "project")
         ]
+
+    def test_the_test_app_migration_leaves_no_changes_to_make(self, db) -> None:
+        try:
+            call_command("makemigrations", "testapp", check=True, dry_run=True)
+        except SystemExit:
+            pytest.fail("makemigrations found changes the migration does not hold")
 
     def test_deconstruct_returns_no_keyword_arguments(self) -> None:
         _, _, _, kwargs = PreferencesField().deconstruct()
