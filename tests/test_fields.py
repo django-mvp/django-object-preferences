@@ -564,3 +564,17 @@ class TestRecordPreferences:
 
         assert values["theme"] == "light"
         assert values["page_size"] == 40
+
+    def test_a_stale_stored_value_is_not_stored_after_the_group_is_changed(
+        self, project, preference_registry
+    ) -> None:
+        project.preferences = {"display": {"theme": "dark", "page_size": 40}}
+        project.preferences.save()
+        del preference_registry.declarations[Project]["display"]
+        preference_registry.register(Project, "display", NarrowedDisplayForm)
+
+        project.preferences.change("display", page_size=60)
+        project.preferences.save()
+
+        reloaded = Project.objects.get(pk=project.pk)
+        assert reloaded.preferences.stored == {"display": {"page_size": 60}}

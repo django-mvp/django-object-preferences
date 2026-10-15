@@ -124,3 +124,10 @@ Did: Wrote the tolerant-read tests first (15 red: AttributeError, TypeError and 
 Verified: uv run pytest tests/test_registry.py::TestPreferenceGroup tests/test_fields.py::TestRecordPreferences, 82 passed; pre-commit run --all-files passed.
 Next: T018 stale value dropped on save.
 Watch: contextlib.suppress(Exception) is deliberate, ruff rejects try/except/pass.
+
+## 2026-10-15T11:31:14Z · Implementer US4 · T018
+
+Did: Added the test that a stale stored value is gone after change() and save(). With object_preferences/ taken back to before T017 it fails with ValidationError (change reads the stale value); with T017 it passes.
+Verified: uv run pytest tests/test_fields.py -k stale_stored_value_is_not_stored, 1 passed (1 failed with the T017 code removed); pre-commit run --all-files passed.
+Next: T019 example, README, CHANGELOG.
+Watch: none.

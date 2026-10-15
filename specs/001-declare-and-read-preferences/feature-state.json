@@ -394,8 +394,19 @@
         },
         {
           "id": "T018",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_a_stale_stored_value_is_not_stored_after_the_group_is_changed"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -k stale_stored_value_is_not_stored"
+            ],
+            "code": [
+              "object_preferences/fields.py:46"
+            ]
+          }
         },
         {
           "id": "T019",
