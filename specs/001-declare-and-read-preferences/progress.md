@@ -12,3 +12,10 @@ Did: test app (Project, Plain), ProjectFactory, project fixture, testapp in INST
 Verified: uv run pytest -q, 1 passed; pre-commit all files passed.
 Next: T002 PreferencesField.
 Watch: Project has no preferences field until T002.
+
+## 2026-10-15T11:13:17Z · Implementer US1 · T002
+
+Did: PreferencesField with defaults and minimal deconstruct; Project carries the field. deconstruct also restores blank/editable when the host overrides to Django default, since Django omits them.
+Verified: uv run pytest tests/test_fields.py -q, 5 passed; pre-commit and mypy clean.
+Next: T003 descriptor and RecordPreferences.
+Watch: autodetector test uses a graph with a stand-in 0001 node because changes() drops apps absent from the graph.

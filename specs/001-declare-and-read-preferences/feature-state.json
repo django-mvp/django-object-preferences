@@ -84,8 +84,19 @@
         },
         {
           "id": "T002",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 2,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestPreferencesField"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -q"
+            ],
+            "code": [
+              "object_preferences/fields.py:12"
+            ]
+          }
         },
         {
           "id": "T003",
