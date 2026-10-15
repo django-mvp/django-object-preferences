@@ -90,6 +90,9 @@ count queries.
   `register`, `registry`, `PreferenceRegistry`, `PreferenceGroup`, `get_groups` and `get_group`,
   and saying what the default is. CHANGELOG.
 
+- [x] T020 [US2] Acceptance fix: error messages name the model with Django's own
+  `model._meta.label` instead of a helper of our own, found by the documentation gate.
+
 **Checkpoint**: a host project can declare and read preferences.
 
 ## Phase 3: User Story 3 — A developer changes and saves a record's preferences from code (P2, #13)

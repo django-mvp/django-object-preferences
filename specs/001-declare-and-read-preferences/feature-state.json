@@ -232,6 +232,23 @@
               "README.md:73"
             ]
           }
+        },
+        {
+          "id": "T020",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_registry.py::TestPreferenceRegistry"
+            ],
+            "commands": [
+              "uv run pytest -n auto",
+              "forge verify --steps docs"
+            ],
+            "code": [
+              "object_preferences/registry.py:1"
+            ]
+          }
         }
       ]
     },

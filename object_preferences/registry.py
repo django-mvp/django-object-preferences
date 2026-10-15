@@ -18,18 +18,6 @@ UNSUPPORTED_FIELDS = (
 )
 
 
-def model_label(model: type[models.Model]) -> str:
-    """Return a model's name as ``app_label.ModelName``.
-
-    Args:
-        model: The model to name.
-
-    Returns:
-        The label, as Django writes it in its own messages.
-    """
-    return f"{model._meta.app_label}.{model.__name__}"
-
-
 @dataclass(frozen=True)
 class PreferenceGroup:
     """A named form, declared by one app for one model, whose fields are preferences.
@@ -122,7 +110,7 @@ class PreferenceRegistry:
         ]
         if len(fields) != 1:
             raise ImproperlyConfigured(
-                f"{model_label(model)} must have exactly one PreferencesField "
+                f"{model._meta.label} must have exactly one PreferencesField "
                 f"to carry preferences, but has {len(fields)}."
             )
         return fields[0]
@@ -149,14 +137,14 @@ class PreferenceRegistry:
         if name in self.declarations.get(model, {}):
             raise ImproperlyConfigured(
                 f"A preference group named {name!r} is already registered for "
-                f"{model_label(model)}."
+                f"{model._meta.label}."
             )
         for field_name, field in form_class().fields.items():
             if isinstance(field, UNSUPPORTED_FIELDS):
                 raise ImproperlyConfigured(
                     f"{form_class.__name__}.{field_name} is a "
                     f"{type(field).__name__}, which cannot be a preference in "
-                    f"group {name!r} of {model_label(model)}."
+                    f"group {name!r} of {model._meta.label}."
                 )
         group = PreferenceGroup(model, name, form_class)
         self.declarations.setdefault(model, {})[name] = group
@@ -190,7 +178,7 @@ class PreferenceRegistry:
             return self.declarations[model][name]
         except KeyError:
             raise KeyError(
-                f"No preference group {name!r} is declared for {model_label(model)}."
+                f"No preference group {name!r} is declared for {model._meta.label}."
             ) from None
 
 
