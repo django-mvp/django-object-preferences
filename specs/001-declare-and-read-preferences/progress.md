@@ -194,3 +194,10 @@ Did: correction to the entry above. The first T029 run failed (4 failed) because
 Verified: `uv run pytest tests/test_fields.py -q` and `uv run pre-commit run --all-files` green on the amended commit (counts in the final run below).
 Next: full suite and checks.
 Watch: the earlier "72 passed" line in the entry above was written before the run was read and is wrong.
+
+## 2026-10-15T11:47:57Z · Forge · S6
+
+Did: code review (one round), request changes with 1 high, 2 medium, 3 low. One fix cycle T024-T029 by an in-turn implementer, each remedy verified by mutation (timezone test red with prepare_value storage, non-ISO test red without the ISO parse, UUID test red without force_update). Dropped a line-length test the cycle added (style, not behaviour). The security and architecture lenses were not run: no auth, upload, outbound fetch, raw SQL or new dependency in the diff, and the implementation follows the reviewed plan.
+Verified: forge verify green (115 tests), tamper flags all from the authorised COR-006 change and additive test-app models.
+Next: ready for review and the walkthrough.
+Watch: CI on the first non-draft push.
