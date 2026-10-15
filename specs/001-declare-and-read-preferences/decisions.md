@@ -246,3 +246,18 @@ Carried into the implementation briefs rather than re-planned:
   each with a comment saying it only ever runs locally.
 - Messages raised for developer mistakes (`ImproperlyConfigured`, `KeyError`) are not translated.
   Article VIII covers user-facing strings, and these are developer-facing.
+
+## D6 — Stories are dispatched in-turn while gateway spawning is unavailable
+
+**Decision**: each story's implementer runs as an in-turn agent on the Sonnet tier, in its own
+worktree, with the usual brief, craft-skill gate, receipts check and independent re-verification.
+
+**Why**: on 2026-10-15 the gateway refused every subagent spawn from this session ("the selected
+account or native runtime is unavailable"), for every model. The orchestrating session was told.
+Running the implementers in-turn keeps the work on the tier the pipeline sets for it and keeps the
+builder separate from the one who accepts the story. What it loses is the per-story cost
+attribution, because the transcripts land with this session rather than under each worktree.
+
+**Revisit if**: spawning works again, at which point the remaining stories go back to it.
+
+**ADR:** none — a one-off workaround for a tooling outage, nothing in the package
