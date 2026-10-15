@@ -104,6 +104,14 @@ class ConsistentForm(forms.Form):
         return cleaned
 
 
+class NarrowedDisplayForm(forms.Form):
+    theme = forms.ChoiceField(
+        choices=[("light", "Light"), ("sepia", "Sepia")], initial="light"
+    )
+    page_size = forms.IntegerField(initial=25, min_value=5, max_value=100)
+    show_archived = forms.BooleanField(required=False)
+
+
 class TestRecordPreferences:
     def test_a_new_record_stores_nothing(self) -> None:
         record = Project(name="New")
@@ -521,3 +529,38 @@ class TestRecordPreferences:
             record.preferences.save()
 
         assert Project.objects.count() == 0
+
+    def test_a_stored_group_no_longer_declared_is_ignored(self, project) -> None:
+        project.preferences = {"retired": {"theme": "dark"}, "display": {"x": 1}}
+
+        assert project.preferences["display"]["page_size"] == 25
+        assert "retired" not in project.preferences
+
+    @pytest.mark.parametrize("stored", [None, [], "dark", 3])
+    def test_a_stored_root_that_is_not_a_dictionary_reads_every_group_as_defaults(
+        self, project, stored
+    ) -> None:
+        project.preferences = stored
+
+        assert project.preferences["display"]["theme"] == "light"
+        assert project.preferences["typed"]["budget"] == decimal.Decimal("10.50")
+
+    @pytest.mark.parametrize("entry", [None, [], "dark", 3])
+    def test_a_group_entry_that_is_not_a_dictionary_reads_as_defaults(
+        self, project, entry
+    ) -> None:
+        project.preferences = {"display": entry}
+
+        assert project.preferences["display"]["theme"] == "light"
+
+    def test_a_stored_value_that_no_longer_fits_reads_the_default_beside_the_rest(
+        self, project, preference_registry
+    ) -> None:
+        project.preferences = {"display": {"theme": "dark", "page_size": 40}}
+        del preference_registry.declarations[Project]["display"]
+        preference_registry.register(Project, "display", NarrowedDisplayForm)
+
+        values = project.preferences["display"]
+
+        assert values["theme"] == "light"
+        assert values["page_size"] == 40

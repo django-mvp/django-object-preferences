@@ -149,6 +149,26 @@ class RequiredForm(forms.Form):
     colour = forms.ChoiceField(choices=[("red", "Red")])
 
 
+class NarrowedDisplayForm(forms.Form):
+    theme = forms.ChoiceField(choices=[("light", "Light"), ("sepia", "Sepia")])
+    page_size = forms.IntegerField(initial=25, max_value=50)
+
+
+class RetypedForm(forms.Form):
+    page_size = forms.DateField(initial=datetime.date(2026, 1, 1))
+
+
+class OrderedForm(forms.Form):
+    low = forms.IntegerField(initial=1)
+    high = forms.IntegerField(initial=10)
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned["low"] > cleaned["high"]:
+            raise forms.ValidationError("Low is above high.", code="inverted")
+        return cleaned
+
+
 class TestPreferenceGroup:
     def test_defaults_come_from_each_fields_initial_value(self) -> None:
         group = PreferenceGroup(Project, "display", ProjectDisplayForm)
@@ -219,3 +239,57 @@ class TestPreferenceGroup:
 
         assert value == expected
         assert type(value) is type(expected)
+
+    def test_a_stored_value_outside_narrowed_choices_reads_the_default(self) -> None:
+        group = PreferenceGroup(Project, "display", NarrowedDisplayForm)
+
+        values = group.read({"theme": "dark"})
+
+        assert values["theme"] == group.defaults()["theme"]
+
+    def test_a_stored_value_above_a_lowered_maximum_reads_the_default(self) -> None:
+        group = PreferenceGroup(Project, "display", NarrowedDisplayForm)
+
+        values = group.read({"theme": "sepia", "page_size": 80})
+
+        assert values == {"theme": "sepia", "page_size": 25}
+
+    def test_a_stored_value_of_a_changed_type_reads_the_default(self) -> None:
+        group = PreferenceGroup(Project, "display", RetypedForm)
+
+        values = group.read({"page_size": 25})
+
+        assert values == {"page_size": datetime.date(2026, 1, 1)}
+
+    def test_a_stored_value_whose_cleaning_raises_something_else_reads_the_default(
+        self,
+    ) -> None:
+        group = PreferenceGroup(Project, "typed", TypedForm)
+
+        values = group.read({"start_date": {"a": 1}})
+
+        assert values["start_date"] == datetime.date(2026, 1, 1)
+
+    def test_a_stored_preference_no_longer_declared_is_ignored(self) -> None:
+        group = PreferenceGroup(Project, "display", ProjectDisplayForm)
+
+        values = group.read({"theme": "dark", "retired": 1})
+
+        assert values == {"theme": "dark", "page_size": 25, "show_archived": False}
+
+    @pytest.mark.parametrize("stored", [None, [], "dark", 3, ["theme"]])
+    def test_stored_values_that_are_not_a_dictionary_read_the_defaults(
+        self, stored
+    ) -> None:
+        group = PreferenceGroup(Project, "display", ProjectDisplayForm)
+
+        assert group.read(stored) == group.defaults()
+
+    def test_a_stored_combination_the_form_now_rejects_still_reads_by_value(
+        self,
+    ) -> None:
+        group = PreferenceGroup(Project, "ordered", OrderedForm)
+
+        values = group.read({"low": 20, "high": 5})
+
+        assert values == {"low": 20, "high": 5}

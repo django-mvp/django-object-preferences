@@ -53,7 +53,10 @@ class RecordPreferences(Mapping[str, Mapping[str, Any]]):
             KeyError: If no group of that name is declared for the record's model.
         """
         group = registry.get_group(type(self.record), name)
-        return MappingProxyType(group.read(self.stored.get(name, {})))
+        stored = self.stored
+        return MappingProxyType(
+            group.read(stored.get(name, {}) if isinstance(stored, dict) else {})
+        )
 
     def get_form(
         self, name: str, /, data: Mapping[str, Any] | None = None, **kwargs: Any

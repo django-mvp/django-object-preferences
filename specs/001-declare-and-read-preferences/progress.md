@@ -117,3 +117,10 @@ Did: README section on changing from code (change, save, get_form, apply, Valida
 Verified: ran the README change/save/ValidationError snippets in the example project shell; outputs matched the text; pre-commit clean. No other page under docs/ describes this API.
 Next: full suite.
 Watch: none.
+
+## 2026-10-15T11:30:59Z · Implementer US4 · T017
+
+Did: Wrote the tolerant-read tests first (15 red: AttributeError, TypeError and ValidationError from stale data), then PreferenceGroup.read treats a non-dict as nothing stored and falls back to the default when cleaning raises; RecordPreferences.__getitem__ reads a non-dict root as {}.
+Verified: uv run pytest tests/test_registry.py::TestPreferenceGroup tests/test_fields.py::TestRecordPreferences, 82 passed; pre-commit run --all-files passed.
+Next: T018 stale value dropped on save.
+Watch: contextlib.suppress(Exception) is deliberate, ruff rejects try/except/pass.

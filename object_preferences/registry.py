@@ -1,5 +1,6 @@
 """Preference groups and the registry that holds them."""
 
+import contextlib
 import json
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -60,21 +61,27 @@ class PreferenceGroup:
                 defaults[name] = field.to_python(value)
         return defaults
 
-    def read(self, stored: dict[str, Any]) -> dict[str, Any]:
+    def read(self, stored: Any) -> dict[str, Any]:
         """Return every preference of the group, typed as its field produces it.
 
         Args:
-            stored: The values stored for this group, assumed to be a dictionary
-                of values their fields accept.
+            stored: The values stored for this group. Anything but a dictionary
+                reads as nothing stored, and a stored value the field no longer
+                accepts reads as the default.
 
         Returns:
             Each preference's value by name, stored or default.
         """
         form = self.form_class()
         values = self.defaults(form)
+        if not isinstance(stored, dict):
+            return values
         for name, field in form.fields.items():
             if name in stored:
-                values[name] = field.clean(stored[name])
+                # Stored data is untrusted and cleaning can raise more than
+                # ValidationError, so no value may break a read (FR-016, SC-004).
+                with contextlib.suppress(Exception):
+                    values[name] = field.clean(stored[name])
         return values
 
     def to_stored(

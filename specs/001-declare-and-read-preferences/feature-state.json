@@ -378,8 +378,19 @@
       "tasks": [
         {
           "id": "T017",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences"
+            ],
+            "commands": [
+              "uv run pytest tests/test_registry.py::TestPreferenceGroup tests/test_fields.py::TestRecordPreferences"
+            ],
+            "code": [
+              "object_preferences/fields.py:46"
+            ]
+          }
         },
         {
           "id": "T018",
