@@ -18,6 +18,8 @@ package belong to R4 and the Django admin to R5. Inheritance between models is R
 **Why.** It is the issue's own paragraph and R2's deliverables, with nothing added beyond the
 points below.
 
+**ADR:** none — the reading of the issue, recorded in the spec itself
+
 ## D2. One save for every group, all or nothing
 
 **Ambiguous:** whether each group saves on its own or the page saves them together.
@@ -29,6 +31,8 @@ is shown at once.
 validation". One form submission that partly succeeds would leave a person unsure what was kept.
 Separate saves per group would be a separate design that a user interface package can still build
 on top later.
+
+**ADR:** docs/adr/0003-the-preferences-page-is-a-detail-view-with-no-access-rule.md
 
 ## D3. The page applies no access rule of its own
 
@@ -46,6 +50,8 @@ and one a developer would not expect from a Django editing view. The risk is a p
 mistake. FR-019 answers it in the documentation, and the package installs no URL by itself
 (FR-001), so nothing is reachable until a developer routes it.
 
+**ADR:** docs/adr/0003-the-preferences-page-is-a-detail-view-with-no-access-rule.md
+
 ## D4. Back to the same page after saving, with a message when messages are on
 
 **Ambiguous:** where the person goes after a successful save, and whether they are told.
@@ -57,6 +63,8 @@ message is added when Django's messages framework is enabled, and the page works
 part of Django, so using it when present adds no dependency, and requiring it would break projects
 that do not enable it.
 
+**ADR:** none — a default a project overrides with `success_url`; nothing downstream inherits it
+
 ## D5. Same-named preferences in two groups stay apart
 
 **Ambiguous:** two apps' groups may each declare, say, `theme`.
@@ -66,6 +74,8 @@ that do not enable it.
 **Why:** G1 lets any installed app add its own group, and apps do not coordinate their field
 names. A clash would make one app's preference silently overwrite another's.
 
+**ADR:** none — follows from the form prefix, local to the page
+
 ## D6. Saving writes the preferences and nothing else on the record
 
 **Chosen:** saving the page writes only the record's preferences.
@@ -73,6 +83,8 @@ names. A clash would make one app's preference silently overwrite another's.
 **Why:** the record is often the user model or another model with its own fields, edited
 elsewhere at the same time. A save that rewrote every field could undo someone else's change to
 an unrelated field.
+
+**ADR:** none — FS-001's `save()` already writes only the preferences (ADR 0001)
 
 ## D7. The groups shown are whatever FS-001 says is declared for the model
 
@@ -82,6 +94,8 @@ looks further itself.
 **Why:** keeps the page from depending on how groups are found, so inheritance (R3) reaches the
 page with no change. Choosing a subset of groups for one page was not asked for (Assumptions).
 
+**ADR:** none — the page reads whatever the registry reports; the registry's rules are ADR 0002
+
 ## D8. A model with no preferences fails clearly
 
 **Chosen:** using the page for a model that has not been given preferences fails with an error
@@ -89,6 +103,8 @@ that names the problem.
 
 **Why:** that is a developer's mistake, and a clear error at first use is cheaper to act on than a
 page that opens empty.
+
+**ADR:** none — the registry's own error, raised on first use
 
 ## D9. No sketch
 
@@ -102,10 +118,14 @@ the access rules, the labels on controls. There is nothing here that only a pers
 can decide. A user-facing form would usually be prototyped first, and this is one, but its layout
 is not this package's to judge. That judgement belongs to R4.
 
+**ADR:** none — a process choice for this feature, not a decision about the code
+
 ## D10. A new domain term: preferences page
 
 `CONTEXT.md` has no name for the page. The spec calls it the **preferences page**. The build adds
 it to `CONTEXT.md` in the same pull request.
+
+**ADR:** none — a glossary entry, recorded in CONTEXT.md
 
 ## D11. Two stories for developers, one for users
 
@@ -114,6 +134,8 @@ the page and sets who may use it (Story 2). Pointing the page at the signed-in p
 story (Story 3) because the issue asks for it by name and it is a distinct thing a developer does,
 though it uses Story 2's page. It is P2 because it adds no capability that Stories 1 and 2 do not
 already provide.
+
+**ADR:** none — how the specification was split into stories
 
 ## D12. A group's legend is its name, not translated text
 
@@ -124,6 +146,8 @@ letter.
 nothing in this specification asks for. The name is the host project's own text, chosen in its
 own code, so FR-017 (text the page itself shows) does not reach it. A project that wants
 different words overrides the template. Raised by the design review (SPEC-002, low).
+
+**ADR:** none — a template detail a project overrides; restyling points are R4
 
 ## D13. The example project gains accounts and both kinds of page
 
@@ -137,6 +161,8 @@ SC-006 ("the documentation's example works as written") can be seen running in a
 not only in the test suite. It ships nothing in the package. Raised by the design review
 (SPEC-003, low).
 
+**ADR:** none — the example project is not part of the package
+
 ## D14. The page protects itself against forged submissions
 
 **Chosen:** `PreferencesView.dispatch()` is wrapped in `csrf_protect`.
@@ -146,3 +172,5 @@ Django's own sign-in and password views protect themselves the same way
 (`django/contrib/auth/views.py`), while its generic editing views rely on the middleware. One
 decorator removes the dependency on a setting the package cannot see, and it does nothing extra
 when the middleware is present. Raised by the design review (SEC-001, low).
+
+**ADR:** none — one decorator on the view, noted in ADR 0003

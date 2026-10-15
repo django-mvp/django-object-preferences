@@ -85,8 +85,8 @@ class PreferencesView(DetailView):
         self.object = self.get_object()
         forms = self.get_forms(data=request.POST)
         # A list, so that every form is validated and every error is shown.
-        results = [form.is_valid() for form in forms.values()]
-        if all(results):
+        valid = [form.is_valid() for form in forms.values()]
+        if all(valid):
             return self.forms_valid(forms)
         return self.forms_invalid(forms)
 
