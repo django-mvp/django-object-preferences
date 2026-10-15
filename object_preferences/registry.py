@@ -2,10 +2,10 @@
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django import forms
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db import models
 
 if TYPE_CHECKING:
@@ -43,6 +43,50 @@ class PreferenceGroup:
     model: type[models.Model]
     name: str
     form_class: type[forms.BaseForm]
+
+    def defaults(self, form: forms.BaseForm | None = None) -> dict[str, Any]:
+        """Return what each preference reads when nothing is stored for it.
+
+        A preference's default is its field's initial value, or the value the
+        field gives an empty submission when it has none. A required field with
+        neither reads as empty rather than raising.
+
+        Args:
+            form: A form of the group to read the fields from. A fresh one is
+                made when omitted.
+
+        Returns:
+            Each preference's default by name.
+        """
+        if form is None:
+            form = self.form_class()
+        defaults = {}
+        for name, field in form.fields.items():
+            value = form.get_initial_for_field(field, name)
+            if value is None:
+                value = field.widget.value_from_datadict({}, {}, name)
+            try:
+                defaults[name] = field.clean(value)
+            except ValidationError:
+                defaults[name] = field.to_python(value)
+        return defaults
+
+    def read(self, stored: dict[str, Any]) -> dict[str, Any]:
+        """Return every preference of the group, typed as its field produces it.
+
+        Args:
+            stored: The values stored for this group, assumed to be a dictionary
+                of values their fields accept.
+
+        Returns:
+            Each preference's value by name, stored or default.
+        """
+        form = self.form_class()
+        values = self.defaults(form)
+        for name, field in form.fields.items():
+            if name in stored:
+                values[name] = field.clean(stored[name])
+        return values
 
 
 class PreferenceRegistry:

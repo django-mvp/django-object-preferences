@@ -1,5 +1,9 @@
 """PreferenceRegistry and PreferenceGroup."""
 
+import datetime
+import decimal
+import uuid
+
 import pytest
 from django import forms
 from django.core.exceptions import ImproperlyConfigured
@@ -9,6 +13,8 @@ from object_preferences.registry import PreferenceGroup, PreferenceRegistry
 from object_preferences.registry import register as register_group
 from object_preferences.registry import registry as default_registry
 from tests.testapp.models import Plain, Project
+from tests.testapp.preferences import DisplayForm as ProjectDisplayForm
+from tests.testapp.preferences import TypedForm
 
 
 class DisplayForm(forms.Form):
@@ -134,3 +140,82 @@ class TestPreferenceRegistry:
 
         assert "missing" in str(excinfo.value)
         assert "testapp.Project" in str(excinfo.value)
+
+
+class RequiredForm(forms.Form):
+    nickname = forms.CharField()
+    count = forms.IntegerField()
+    agreed = forms.BooleanField()
+    colour = forms.ChoiceField(choices=[("red", "Red")])
+
+
+class TestPreferenceGroup:
+    def test_defaults_come_from_each_fields_initial_value(self) -> None:
+        group = PreferenceGroup(Project, "display", ProjectDisplayForm)
+
+        defaults = group.defaults()
+
+        assert defaults["theme"] == "light"
+        assert defaults["page_size"] == 25
+
+    def test_a_field_with_no_initial_defaults_to_what_an_empty_submission_gives(
+        self,
+    ) -> None:
+        group = PreferenceGroup(Project, "typed", TypedForm)
+
+        defaults = group.defaults()
+
+        assert defaults["timeout"] is None
+        assert defaults["tags"] == []
+        assert defaults["token"] == uuid.UUID("12345678-1234-5678-1234-567812345678")
+
+    def test_an_unchecked_checkbox_defaults_to_false(self) -> None:
+        group = PreferenceGroup(Project, "display", ProjectDisplayForm)
+
+        assert group.defaults()["show_archived"] is False
+
+    def test_a_required_field_with_no_initial_defaults_to_empty_without_raising(
+        self,
+    ) -> None:
+        group = PreferenceGroup(Project, "required", RequiredForm)
+
+        defaults = group.defaults()
+
+        assert defaults == {
+            "nickname": "",
+            "count": None,
+            "agreed": False,
+            "colour": "",
+        }
+
+    def test_read_gives_the_default_for_a_preference_with_nothing_stored(self) -> None:
+        group = PreferenceGroup(Project, "display", ProjectDisplayForm)
+
+        values = group.read({"theme": "dark"})
+
+        assert values == {"theme": "dark", "page_size": 25, "show_archived": False}
+
+    @pytest.mark.parametrize(
+        ("name", "stored", "expected"),
+        [
+            ("start_date", "2026-03-04", datetime.date(2026, 3, 4)),
+            ("reminder_time", "10:15:00", datetime.time(10, 15)),
+            ("budget", "3.25", decimal.Decimal("3.25")),
+            ("timeout", "P1DT02H00M00S", datetime.timedelta(days=1, hours=2)),
+            (
+                "token",
+                "87654321-4321-8765-4321-876543218765",
+                uuid.UUID("87654321-4321-8765-4321-876543218765"),
+            ),
+            ("tags", ["a", "b"], ["a", "b"]),
+        ],
+    )
+    def test_a_stored_value_reads_as_the_type_its_field_produces(
+        self, name, stored, expected
+    ) -> None:
+        group = PreferenceGroup(Project, "typed", TypedForm)
+
+        value = group.read({name: stored})[name]
+
+        assert value == expected
+        assert type(value) is type(expected)

@@ -1,6 +1,7 @@
 """The model field that turns preferences on for a model."""
 
-from collections.abc import Sequence
+from collections.abc import Iterator, Mapping, Sequence
+from types import MappingProxyType
 from typing import Any
 
 from django.core.serializers.json import DjangoJSONEncoder
@@ -8,9 +9,14 @@ from django.db import models
 from django.db.models.query_utils import DeferredAttribute
 from django.utils.translation import gettext_lazy as _
 
+from object_preferences.registry import registry
 
-class RecordPreferences:
+
+class RecordPreferences(Mapping[str, Mapping[str, Any]]):
     """One record's preferences, as the record's attribute returns them.
+
+    It maps each group name declared for the record's model to a read-only
+    mapping of that group's values.
 
     Attributes:
         record: The record the preferences belong to.
@@ -31,6 +37,29 @@ class RecordPreferences:
     def stored(self) -> Any:
         """The record's stored dictionary, as it is stored."""
         return self.record.__dict__[self.field.attname]
+
+    def __getitem__(self, name: str) -> Mapping[str, Any]:
+        """Return one group's values, read-only.
+
+        Args:
+            name: The group's name.
+
+        Returns:
+            Each of the group's preferences by name, stored or default.
+
+        Raises:
+            KeyError: If no group of that name is declared for the record's model.
+        """
+        group = registry.get_group(type(self.record), name)
+        return MappingProxyType(group.read(self.stored.get(name, {})))
+
+    def __iter__(self) -> Iterator[str]:
+        """Iterate over the names of the groups declared for the record's model."""
+        return iter(group.name for group in registry.get_groups(type(self.record)))
+
+    def __len__(self) -> int:
+        """Return how many groups are declared for the record's model."""
+        return len(registry.get_groups(type(self.record)))
 
 
 class PreferencesDescriptor(DeferredAttribute):

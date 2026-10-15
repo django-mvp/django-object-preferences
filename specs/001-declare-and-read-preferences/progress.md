@@ -54,3 +54,10 @@ Did: ready() calls autodiscover_modules("preferences"); tests/testapp/preference
 Verified: uv run pytest tests/test_apps.py tests/test_registry.py -x, 18 passed; red first (no groups found).
 Next: T008 reading.
 Watch: none.
+
+## 2026-10-15T11:19:28Z · Implementer US2 · T008
+
+Did: PreferenceGroup.defaults/read and RecordPreferences as a Mapping of group name to MappingProxyType; tests in TestPreferenceGroup and TestRecordPreferences.
+Verified: uv run pytest tests/test_registry.py tests/test_fields.py -q, 55 passed; pre-commit and mypy clean.
+Next: T009 makemigrations check.
+Watch: read() assumes well-formed stored data until US4.

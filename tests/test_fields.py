@@ -1,5 +1,8 @@
 """PreferencesField and the accessor its descriptor returns."""
 
+import datetime
+from types import MappingProxyType
+
 import pytest
 from django import forms
 from django.apps import apps
@@ -9,6 +12,7 @@ from django.db.migrations.graph import MigrationGraph
 from django.db.migrations.state import ProjectState
 
 from object_preferences.fields import PreferencesField
+from object_preferences.registry import registry
 from tests.testapp.models import Project
 
 
@@ -70,6 +74,14 @@ class TestPreferencesField:
         assert "preferences" not in form_class.base_fields
 
 
+class ChangedDisplayForm(forms.Form):
+    theme = forms.ChoiceField(
+        choices=[("light", "Light"), ("dark", "Dark")], initial="dark"
+    )
+    page_size = forms.IntegerField(initial=50)
+    show_archived = forms.BooleanField(required=False)
+
+
 class TestRecordPreferences:
     def test_a_new_record_stores_nothing(self) -> None:
         record = Project(name="New")
@@ -129,3 +141,73 @@ class TestRecordPreferences:
         field = Project._meta.get_field("preferences")
 
         assert field.value_from_object(project) == {}
+
+    def test_iterating_gives_the_names_of_the_declared_groups(self, project) -> None:
+        assert list(project.preferences) == ["display", "typed"]
+
+    def test_its_length_is_the_number_of_declared_groups(self, project) -> None:
+        assert len(project.preferences) == 2
+
+    def test_an_unchanged_preference_reads_its_default(self, project) -> None:
+        assert project.preferences["display"]["theme"] == "light"
+
+    def test_a_preference_with_no_initial_reads_the_empty_submission_value(
+        self, project
+    ) -> None:
+        assert project.preferences["typed"]["timeout"] is None
+
+    def test_a_stored_value_reads_back_as_the_field_type(self, project) -> None:
+        project.preferences = {"typed": {"start_date": "2026-03-04"}}
+
+        value = project.preferences["typed"]["start_date"]
+
+        assert value == datetime.date(2026, 3, 4)
+
+    def test_a_stored_value_survives_a_save_and_reload(self, project) -> None:
+        project.preferences = {"display": {"page_size": 40}}
+        project.save()
+
+        reloaded = Project.objects.get(pk=project.pk)
+
+        assert reloaded.preferences["display"]["page_size"] == 40
+
+    def test_reading_every_preference_of_a_loaded_record_runs_no_queries(
+        self, project, django_assert_num_queries
+    ) -> None:
+        loaded = Project.objects.get(pk=project.pk)
+
+        with django_assert_num_queries(0):
+            for group in loaded.preferences.values():
+                list(group.values())
+
+    def test_a_changed_default_reaches_a_record_with_nothing_stored(
+        self, project, preference_registry
+    ) -> None:
+        del registry.declarations[Project]["display"]
+        registry.register(Project, "display", ChangedDisplayForm)
+
+        assert project.preferences["display"]["theme"] == "dark"
+
+    def test_a_record_that_stored_its_own_value_keeps_reading_it(
+        self, project, preference_registry
+    ) -> None:
+        project.preferences = {"display": {"theme": "light"}}
+        del registry.declarations[Project]["display"]
+        registry.register(Project, "display", ChangedDisplayForm)
+
+        assert project.preferences["display"]["theme"] == "light"
+
+    def test_an_undeclared_group_is_a_key_error_naming_it(self, project) -> None:
+        with pytest.raises(KeyError, match="missing"):
+            project.preferences["missing"]
+
+    def test_an_undeclared_preference_is_a_key_error_naming_it(self, project) -> None:
+        with pytest.raises(KeyError, match="missing"):
+            project.preferences["display"]["missing"]
+
+    def test_a_groups_values_are_read_only(self, project) -> None:
+        values = project.preferences["display"]
+
+        assert isinstance(values, MappingProxyType)
+        with pytest.raises(TypeError):
+            values["theme"] = "dark"
