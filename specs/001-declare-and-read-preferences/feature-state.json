@@ -349,6 +349,22 @@
               "README.md:118"
             ]
           }
+        },
+        {
+          "id": "T021",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_applying_a_group_drops_a_stored_key_it_does_not_declare"
+            ],
+            "commands": [
+              "uv run pytest -n auto"
+            ],
+            "code": [
+              "object_preferences/fields.py:1"
+            ]
+          }
         }
       ]
     },

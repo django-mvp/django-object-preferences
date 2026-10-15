@@ -80,9 +80,9 @@ class RecordPreferences(Mapping[str, Mapping[str, Any]]):
     def apply(self, name: str, form: forms.BaseForm) -> None:
         """Replace one group's stored values with those of a submitted form.
 
-        The record is changed in memory only. Other groups' stored values are
-        left as they are, and so is every stored value of this group that the
-        form does not declare.
+        The record is changed in memory only. The group's stored values are
+        rewritten from the form, so a value the form does not declare is
+        dropped. Every other group's stored values are left as they are.
 
         Args:
             name: The group's name.

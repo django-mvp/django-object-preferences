@@ -132,6 +132,9 @@ invalid value and confirm nothing changed.
 - [ ] T016 [US3] README: changing preferences from code and saving them, quoting `get_form`,
   `apply`, `change` and `save`, and how to run the example project. CHANGELOG.
 
+- [x] T021 [US3] Acceptance fix: `apply()`'s docstring said values the form does not declare
+  are kept, when they are dropped (FR-018).
+
 **Checkpoint**: preferences can be declared, read, changed and saved, and the example runs.
 
 ## Phase 4: User Story 4 — A developer changes a declaration without breaking existing records (P2, #14)
