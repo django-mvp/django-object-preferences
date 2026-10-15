@@ -8,6 +8,7 @@ from django.contrib import messages
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.db.models.signals import post_save
 from django.test import Client
+from django.test.html import Element, parse_html
 from django.urls import reverse
 
 from object_preferences.registry import register
@@ -27,6 +28,26 @@ def submission(**overrides: str) -> dict[str, str]:
     }
     data.update(overrides)
     return data
+
+
+def elements(node: Element | str, name: str) -> list[Element]:
+    """Return every element called ``name`` in a parsed document."""
+    if isinstance(node, str):
+        return []
+    found = [node] if node.name == name else []
+    for child in node.children:
+        found.extend(elements(child, name))
+    return found
+
+
+def attribute(node: Element, name: str) -> str | None:
+    """Return an element's attribute, or None when it has none."""
+    return dict(node.attributes).get(name)
+
+
+def page(response) -> Element:
+    """Parse a rendered page."""
+    return parse_html(response.content.decode())
 
 
 class TestPreferencesView:
@@ -267,3 +288,49 @@ class TestPreferencesViewSaving:
         project.refresh_from_db()
         assert response.status_code == 403
         assert project.preferences.stored == {}
+
+
+class TestPreferencesViewMarkup:
+    def test_every_control_has_a_label_for_its_id(self, client, project) -> None:
+        response = client.get(reverse("project-preferences", args=[project.pk]))
+
+        document = page(response)
+        controls = [
+            control
+            for tag in ("input", "select", "textarea")
+            for control in elements(document, tag)
+            if attribute(control, "type") != "hidden"
+        ]
+        labelled = {attribute(label, "for") for label in elements(document, "label")}
+        assert controls
+        assert all(attribute(control, "id") in labelled for control in controls)
+
+    def test_each_group_is_a_fieldset_with_a_legend(self, client, project) -> None:
+        response = client.get(reverse("project-preferences", args=[project.pk]))
+
+        fieldsets = elements(page(response), "fieldset")
+        assert len(fieldsets) == len(response.context["forms"])
+        assert all(len(elements(fieldset, "legend")) == 1 for fieldset in fieldsets)
+
+    def test_an_invalid_control_points_at_the_element_that_holds_its_error(
+        self, client, project
+    ) -> None:
+        response = client.post(
+            reverse("project-preferences", args=[project.pk]),
+            submission(**{"display-page_size": "3"}),
+        )
+
+        document = page(response)
+        control = next(
+            control
+            for control in elements(document, "input")
+            if attribute(control, "name") == "display-page_size"
+        )
+        described_by = attribute(control, "aria-describedby").split()
+        holders = [
+            node
+            for tag in ("div", "ul", "p", "span")
+            for node in elements(document, tag)
+            if attribute(node, "id") in described_by
+        ]
+        assert any(node.children for node in holders)

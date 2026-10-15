@@ -19,3 +19,10 @@ Did: post(), forms_valid(), forms_invalid(), get_success_url(); tests for saving
 Verified: uv run pytest tests/test_views.py (19 passed); pre-commit run --all-files passed.
 Next: T003 markup.
 Watch: the CSRF and unchanged-page tests passed on first run (csrf_protect was already on the class from T001; an unchanged page stores nothing with no code to do it).
+
+## 2026-10-15T12:19:54Z · Implementer US1 · T003
+
+Did: markup tests (label for each control, fieldset with one legend per group, aria-describedby naming the element that holds the error).
+Verified: uv run pytest tests/test_views.py::TestPreferencesViewMarkup (3 passed); probe: replacing legend in the template fails the legend test; pre-commit passed.
+Next: T004 docs.
+Watch: the three tests passed on first run because the template from T001 and Django own form rendering already provide the markup; no production change in this task. The label and aria-describedby tests rest on Django rendering of the form.
