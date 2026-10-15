@@ -2,7 +2,7 @@
   "feature": "001-declare-and-read-preferences",
   "branch": "001-declare-and-read-preferences",
   "repo": "django-mvp/django-object-preferences",
-  "state": "REVIEW",
+  "state": "PR_READY",
   "state_history": [
     {
       "state": "QUEUED",
@@ -33,6 +33,11 @@
       "state": "REVIEW",
       "at": "2026-10-15T11:35:16Z",
       "note": "converged: ADRs 0001-0002, roadmap R1 delivered, story comments green"
+    },
+    {
+      "state": "PR_READY",
+      "at": "2026-10-15T11:49:29Z",
+      "note": "review applied; walkthrough laid out on #9; marking ready for review"
     }
   ],
   "gates": {
@@ -77,6 +82,11 @@
         "COR-005 low: apps.py docstring within 88 (T028); a line-length test the fix added was removed as a style test",
         "COR-006 low: unsaved records via ProjectFactory.build() (T029); tamper flags on tests/test_fields.py, tests/factories.py and the test app migration are this authorised change and additive models only"
       ]
+    },
+    "walkthrough": {
+      "approved_by": null,
+      "at": "2026-10-15T11:49:19Z",
+      "self_resolved": []
     }
   },
   "stories": [
@@ -596,6 +606,6 @@
   },
   "pr": {
     "number": 9,
-    "draft": true
+    "draft": false
   }
 }

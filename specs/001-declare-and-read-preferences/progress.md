@@ -201,3 +201,10 @@ Did: code review (one round), request changes with 1 high, 2 medium, 3 low. One 
 Verified: forge verify green (115 tests), tamper flags all from the authorised COR-006 change and additive test-app models.
 Next: ready for review and the walkthrough.
 Watch: CI on the first non-draft push.
+
+## 2026-10-15T11:49:29Z · Forge · S7
+
+Did: walkthrough laid out on the pull request, description rewritten with the closing block, ledger at PR_READY.
+Verified: verify green, story comments green, walkthrough required for the example page (4 states), example served on port 8028.
+Next: mark ready for review, wait for checks, hand over at the merge gate.
+Watch: nothing outstanding.
