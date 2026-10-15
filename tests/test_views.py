@@ -471,3 +471,42 @@ class TestPreferencesViewRecordTest:
         assert opened.status_code == 200
         assert saved.status_code == 302
         assert user.preferences["notifications"]["digest"] == "weekly"
+
+
+class TestPreferencesViewForOwnPreferences:
+    def test_a_signed_in_person_sees_their_own_stored_value(self, client, db) -> None:
+        person = UserFactory(preferences={"notifications": {"digest": "weekly"}})
+        UserFactory(preferences={"notifications": {"digest": "daily"}})
+        client.force_login(person)
+
+        response = client.get(reverse("own-preferences"))
+
+        assert response.status_code == 200
+        assert response.context["record"] == person
+        assert response.context["forms"]["notifications"].initial["digest"] == "weekly"
+
+    def test_saving_changes_their_own_record_and_not_another_persons(
+        self, client, db
+    ) -> None:
+        person = UserFactory()
+        other = UserFactory()
+        client.force_login(person)
+
+        response = client.post(
+            reverse("own-preferences"), {"notifications-digest": "weekly"}
+        )
+
+        person.refresh_from_db()
+        other.refresh_from_db()
+        assert response.status_code == 302
+        assert person.preferences["notifications"]["digest"] == "weekly"
+        assert other.preferences.stored == {}
+
+    def test_an_anonymous_visitor_is_sent_to_sign_in_and_sees_no_form(
+        self, client, db
+    ) -> None:
+        response = client.get(reverse("own-preferences"))
+
+        assert response.status_code == 302
+        assert response.url.startswith(f"{settings.LOGIN_URL}?next=")
+        assert b"<form" not in response.content

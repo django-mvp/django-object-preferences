@@ -75,3 +75,10 @@ Did: accepted US2 (T005-T008), in-turn harness agent (sonnet) in dop-002-us2.
 Verified: receipts green; forge verify green on the merged branch (152 tests); makemigrations --check clean; tamper-check flags are additive (fixtures, factories, a test User model and its migration, routes; only import lines replaced).
 Next: US3.
 Watch: the README record-test example calls get_object() in test_func; US3 example must match the README verbatim.
+
+## 2026-10-15T12:28:34Z · Implementer US3 · T009
+
+Did: added MyPreferencesView to tests/testapp/views.py, routed at preferences/, three tests, README subsection.
+Verified: uv run pytest tests/test_views.py -k OwnPreferences (3 passed, first seen red on NoReverseMatch); pre-commit and mypy clean.
+Next: T010 example project.
+Watch: README example and test view must stay identical.

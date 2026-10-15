@@ -388,6 +388,45 @@ path(
 )
 ```
 
+### A page for each person's own preferences
+
+The common case is a page where each signed-in person changes their own
+preferences, at one address with no record id. Return the signed-in person from
+`get_object()`, so the page needs no `model`, and require sign-in:
+
+```python
+from django.contrib.auth.mixins import LoginRequiredMixin
+from object_preferences.views import PreferencesView
+
+
+class MyPreferencesView(LoginRequiredMixin, PreferencesView):
+    """Show the signed-in person their own preferences."""
+
+    def get_object(self, queryset=None):
+        """Return the signed-in person as the record the page is for.
+
+        Args:
+            queryset: Unused, as the record is not looked up.
+
+        Returns:
+            The signed-in person.
+        """
+        return self.request.user
+```
+
+Route it at a path with no record id:
+
+```python
+# urls.py
+urlpatterns = [
+    path("preferences/", MyPreferencesView.as_view(), name="my-preferences"),
+]
+```
+
+Your user model must carry a `PreferencesField`, and the groups must be
+registered for it. An anonymous visitor is sent to `LOGIN_URL`, and a signed-in
+person can only ever reach their own record, because no other is looked up.
+
 ## Example project
 
 The repository holds a small Django project in `example/` that declares a

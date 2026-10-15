@@ -5,7 +5,7 @@ from django.urls import path
 
 from object_preferences.views import PreferencesView
 from tests.testapp.models import Document, Plain, Project, User
-from tests.testapp.views import OwnPreferencesView
+from tests.testapp.views import MyPreferencesView, OwnPreferencesView
 
 urlpatterns = [
     path(
@@ -54,4 +54,5 @@ urlpatterns = [
         OwnPreferencesView.as_view(model=User),
         name="user-preferences",
     ),
+    path("preferences/", MyPreferencesView.as_view(), name="own-preferences"),
 ]
