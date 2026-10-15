@@ -2,7 +2,7 @@
   "feature": "002-preferences-page",
   "branch": "002-preferences-page",
   "repo": "django-mvp/django-object-preferences",
-  "state": "REVIEW",
+  "state": "PR_READY",
   "state_history": [
     {
       "state": "QUEUED",
@@ -33,6 +33,11 @@
       "state": "REVIEW",
       "at": "2026-10-15T12:32:26Z",
       "note": "converged: ADR 0003, roadmap R2 delivered, story comments green, one converge cycle"
+    },
+    {
+      "state": "PR_READY",
+      "at": "2026-10-15T12:41:42Z",
+      "note": "review applied (T011-T014); walkthrough laid out on #10; marking ready for review"
     }
   ],
   "gates": {
@@ -74,6 +79,11 @@
         "SEC-001 low: README says a record test reveals existence, get_queryset() makes refusals 404 (T014)",
         "security lens: refused requests read and write nothing, POST reaches only declared fields of the record's groups, only the preferences column is written, CSRF enforced without middleware, no open redirect"
       ]
+    },
+    "walkthrough": {
+      "approved_by": null,
+      "at": "2026-10-15T12:41:44Z",
+      "self_resolved": []
     }
   },
   "stories": [
