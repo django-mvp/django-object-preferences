@@ -20,5 +20,5 @@ class ObjectPreferencesConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
 
     def ready(self) -> None:
-        """Import each installed app's ``preferences`` module, so its groups register."""
+        """Import each installed app's ``preferences`` module to register its groups."""
         autodiscover_modules("preferences")
