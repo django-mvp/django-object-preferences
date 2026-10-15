@@ -61,3 +61,10 @@ Did: routes for login, permission, record test (OwnPreferencesView) and limited 
 Verified: pytest tests/test_views.py 32 passed. Probed: test_func True, login_required removed, permission check removed each fail the matching tests.
 Next: T008 README.
 Watch: tests passed on first run because the behaviour is Django composition, not new code.
+
+## 2026-10-15T12:25:19Z · Implementer US2 · T008
+
+Did: README subsection Deciding who may use the page (warning, four mixin/queryset examples, decorator form) replacing the one-line sentence. CHANGELOG already states no access rule, left alone.
+Verified: pre-commit run --all-files passed. Examples mirror the routes tested in T007 except PermissionRequiredMixin, a plain Django mixin not run here.
+Next: full verify and report.
+Watch: none.

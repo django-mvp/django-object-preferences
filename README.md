@@ -314,7 +314,79 @@ name. Render each form inside its own `<fieldset>`, and include
 `{% csrf_token %}` in the `<form>`. The view checks the token itself, so a
 forged post is refused even when the CSRF middleware is not installed.
 
-The page applies no access rule of its own. Who may open it is yours to decide.
+### Deciding who may use the page
+
+The page applies no access rule of its own. A page you route with no rule is
+open to anyone who can reach its address, who can then read and change that
+record's preferences. Decide who may use it before you route it.
+
+Because `PreferencesView` is an ordinary Django class-based view, Django's own
+tools do the deciding and refuse the way they always do. To require a signed-in
+person, add `LoginRequiredMixin` first:
+
+```python
+from django.contrib.auth.mixins import LoginRequiredMixin
+from object_preferences.views import PreferencesView
+
+
+class ProjectPreferencesView(LoginRequiredMixin, PreferencesView):
+    model = Project
+```
+
+To require a permission, use `PermissionRequiredMixin`. A person without it
+gets a 403 response, and an anonymous visitor is sent to sign in:
+
+```python
+from django.contrib.auth.mixins import PermissionRequiredMixin
+
+
+class ProjectPreferencesView(PermissionRequiredMixin, PreferencesView):
+    model = Project
+    permission_required = "projects.change_project"
+```
+
+To let a person change only some records, test them against the record with
+`UserPassesTestMixin`. Here only the person whose record it is may use the
+page:
+
+```python
+from django.contrib.auth.mixins import UserPassesTestMixin
+
+
+class OwnPreferencesView(UserPassesTestMixin, PreferencesView):
+    model = User
+
+    def test_func(self):
+        return self.request.user == self.get_object()
+```
+
+To limit which records the page can open at all, limit them in
+`get_queryset()`. A record outside the queryset is a 404:
+
+```python
+class OwnProjectPreferencesView(LoginRequiredMixin, PreferencesView):
+    model = Project
+
+    def get_queryset(self):
+        return Project.objects.filter(owner=self.request.user)
+```
+
+If you route the view with `as_view()` instead of subclassing it, wrap it with
+Django's decorators:
+
+```python
+from django.contrib.auth.decorators import login_required, permission_required
+
+path(
+    "projects/<int:pk>/preferences/",
+    login_required(
+        permission_required("projects.change_project", raise_exception=True)(
+            PreferencesView.as_view(model=Project)
+        )
+    ),
+    name="project-preferences",
+)
+```
 
 ## Example project
 

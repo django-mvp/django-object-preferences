@@ -188,8 +188,19 @@
         },
         {
           "id": "T008",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestPreferencesViewAccess"
+            ],
+            "commands": [
+              "uv run pre-commit run --all-files"
+            ],
+            "code": [
+              "README.md:317"
+            ]
+          }
         }
       ]
     },
