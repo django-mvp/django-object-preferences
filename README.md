@@ -360,6 +360,11 @@ class OwnPreferencesView(UserPassesTestMixin, PreferencesView):
         return self.request.user == self.get_object()
 ```
 
+A test that looks the record up runs before the refusal, so a person who is
+refused can still tell a record that exists (403, or a redirect to sign in)
+from one that does not (404). Where that matters, limit the records in
+`get_queryset()` as below, and every record a person may not use is a 404.
+
 To limit which records the page can open at all, limit them in
 `get_queryset()`. A record outside the queryset is a 404:
 

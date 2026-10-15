@@ -13,14 +13,16 @@ from django.core.exceptions import (
     ImproperlyConfigured,
     ValidationError,
 )
+from django.db import connection
 from django.db.models.signals import post_save
 from django.test import Client
 from django.test.html import Element, parse_html
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
 from object_preferences.registry import register
 from tests.factories import PlainFactory, ProjectFactory, UserFactory
-from tests.testapp.models import Project
+from tests.testapp.models import Project, User
 
 
 def submission(**overrides: str) -> dict[str, str]:
@@ -134,6 +136,39 @@ class TestPreferencesView:
         assert response.status_code == 200
         assert response.context["forms"] == {}
 
+    def test_the_page_makes_as_many_queries_however_many_groups_there_are(
+        self, client, project, preference_registry, django_assert_num_queries
+    ) -> None:
+        url = reverse("project-preferences", args=[project.pk])
+        with CaptureQueriesContext(connection) as two_groups:
+            client.get(url)
+        for name in ("extra_one", "extra_two", "extra_three"):
+            register(Project, name=name)(
+                type(name, (forms.Form,), {"note": forms.CharField(required=False)})
+            )
+
+        with django_assert_num_queries(len(two_groups)):
+            response = client.get(url)
+
+        assert len(response.context["forms"]) == 5
+
+    def test_the_record_and_group_names_are_escaped(
+        self, client, db, preference_registry
+    ) -> None:
+        person = UserFactory(username="<b>bold</b>")
+        register(User, name="<i>odd</i>")(
+            type("OddForm", (forms.Form,), {"note": forms.CharField(required=False)})
+        )
+        client.force_login(person)
+
+        response = client.get(reverse("own-preferences"))
+
+        content = response.content.decode()
+        assert "<b>bold</b>" not in content
+        assert "&lt;b&gt;bold&lt;/b&gt;" in content
+        assert "<i>odd</i>" not in content
+        assert "&lt;i&gt;odd&lt;/i&gt;" in content
+
     def test_a_record_that_does_not_exist_is_not_found(self, client, db) -> None:
         response = client.get(reverse("project-preferences", args=[999]))
 
@@ -201,6 +236,35 @@ class TestPreferencesViewSaving:
             NON_FIELD_ERRORS, code="never"
         )
         assert project.preferences.stored == {}
+
+    def test_an_error_from_a_forms_clean_is_shown_in_its_groups_fieldset(
+        self, client, project, preference_registry
+    ) -> None:
+        @register(Project, name="strict")
+        class StrictForm(forms.Form):
+            flag = forms.BooleanField(required=False)
+
+            def clean(self):
+                raise ValidationError("Never valid.", code="never")
+
+        response = client.post(
+            reverse("project-preferences", args=[project.pk]), submission()
+        )
+
+        fieldset = next(
+            fieldset
+            for fieldset in elements(page(response), "fieldset")
+            if any(
+                attribute(control, "name") == "strict-flag"
+                for control in elements(fieldset, "input")
+            )
+        )
+        group_errors = [
+            node
+            for node in elements(fieldset, "ul")
+            if "nonfield" in (attribute(node, "class") or "").split()
+        ]
+        assert any(node.children for node in group_errors)
 
     def test_saving_an_unchanged_page_stores_nothing(self, client, project) -> None:
         response = client.post(

@@ -19,7 +19,7 @@ that story, because the documentation gate reads every story's diff.
 **Independent test**: route the page for `Project` with no rule, open it for one record, submit
 changed values and read the record back.
 
-- [ ] T001 [US1] Test settings and route: `tests/settings.py` gains `django.contrib.messages` and
+- [x] T001 [US1] Test settings and route: `tests/settings.py` gains `django.contrib.messages` and
   the session, authentication and messages middleware; `tests/urls.py` routes
   `PreferencesView.as_view(model=Project)` at `projects/<int:pk>/preferences/`, and the same for
   `Document` (preferences, no groups). `PreferencesView` in `object_preferences/views.py` with
@@ -31,7 +31,7 @@ changed values and read the record back.
   the page opens (US1-3); controls of two groups carry the group's prefix (FR-007); the page
   renders with the package's own template (FR-016); a `Document` page opens with no controls
   (edge case); a record that does not exist is a 404 (US2-5, FR-013).
-- [ ] T002 [US1] Saving: `post()`, `forms_valid()`, `forms_invalid()`, `get_success_url()` per
+- [x] T002 [US1] Saving: `post()`, `forms_valid()`, `forms_invalid()`, `get_success_url()` per
   plan.md. Tests: changes in two groups are both stored and the response redirects to the same
   page (US1-4, FR-008); an invalid value in one group and a valid change in another stores
   nothing, re-renders with the error on that field by code and both entered values in place
@@ -49,11 +49,11 @@ changed values and read the record back.
   `preference_registry` fixture, as `tests/test_fields.py` already does, never in
   `tests/testapp/preferences.py`: three existing tests pin `Project`'s groups (design review
   SPEC-001).
-- [ ] T003 [US1] Accessible markup (FR-015). Tests: every control has a `<label>` whose `for` is
+- [x] T003 [US1] Accessible markup (FR-015). Tests: every control has a `<label>` whose `for` is
   the control's id; each group is a `<fieldset>` with a `<legend>`; after an invalid save the
   invalid control's `aria-describedby` names an element that holds its error. Find elements by id
   and role, not by text.
-- [ ] T004 [US1] Documentation: README "The preferences page" opening section per plan.md
+- [x] T004 [US1] Documentation: README "The preferences page" opening section per plan.md
   "Documentation" (Story 1 part), quoting `PreferencesView`; CHANGELOG under Unreleased;
   `CONTEXT.md` gains **preferences page**; regenerate `object_preferences/locale/en/LC_MESSAGES/
   django.po` with `makemessages -l en` run in `object_preferences/`.
@@ -67,14 +67,14 @@ changed values and read the record back.
 **Independent test**: route the page with a rule that admits only the record's owner, and open and
 submit it as the owner, another person and an anonymous visitor.
 
-- [ ] T005 [US2] A model without preferences (FR-018). Route `PreferencesView.as_view(model=Plain)`.
+- [x] T005 [US2] A model without preferences (FR-018). Route `PreferencesView.as_view(model=Plain)`.
   Test: opening it raises `ImproperlyConfigured` whose message names the model's label (US2-7).
-- [ ] T006 [US2] A test user model: `User(AbstractUser)` with a `PreferencesField` in
+- [x] T006 [US2] A test user model: `User(AbstractUser)` with a `PreferencesField` in
   `tests/testapp/models.py`, `AUTH_USER_MODEL = "testapp.User"`, a group registered for it in
   `tests/testapp/preferences.py`, `UserFactory` in `tests/factories.py`, a `user` fixture in
   `tests/conftest.py`, and the test app migration for it. The inherited `AbstractUser` fields
   carry no `help_text`; the model is not packaged, so no field-metadata test covers it.
-- [ ] T007 [US2] Access rules, in `tests/urls.py` and `tests/testapp/views.py`: `login_required`
+- [x] T007 [US2] Access rules, in `tests/urls.py` and `tests/testapp/views.py`: `login_required`
   around the `Project` page; `permission_required("testapp.change_project", raise_exception=True)`
   around it; a `UserPassesTestMixin` subclass for `User` records admitting only the record itself;
   a `Project` page with `queryset` limited to some records. Tests in `tests/test_views.py`, a
@@ -83,7 +83,7 @@ submit it as the owner, another person and an anonymous visitor.
   (US2-2) and on POST, with the record's stored preferences unchanged (US2-3, FR-012); the owner
   can open and save; a person without the permission gets 403 and one with it can save; a record
   outside the limited queryset is a 404 (US2-4, FR-013).
-- [ ] T008 [US2] Documentation: README "Who may use the page" per plan.md (Story 2 part), with
+- [x] T008 [US2] Documentation: README "Who may use the page" per plan.md (Story 2 part), with
   the warning that a page with no rule is open to anyone who can reach it (FR-019) and the error
   for a model without preferences; CHANGELOG line if the entry needs it.
 
@@ -95,13 +95,27 @@ the common case.
 **Independent test**: follow the documented example, sign in as two people in turn, and check each
 sees and changes only their own.
 
-- [ ] T009 [US3] README "A page for each person's own preferences" (FR-014) and the same view in
+- [x] T009 [US3] README "A page for each person's own preferences" (FR-014) and the same view in
   `tests/testapp/views.py`, verbatim apart from imports, routed at `preferences/`. Tests: a
   signed-in person sees their own stored value (US3-1); saving changes their record and not
   another person's (US3-2); an anonymous visitor is redirected to sign in (US3-3).
-- [ ] T010 [US3] The example project per plan.md "The example project": user model, groups,
+- [x] T010 [US3] The example project per plan.md "The example project": user model, groups,
   settings, URLs, sign-in template, links, seed accounts, migration. README "Example project"
   rewritten to say what it now shows and how to sign in. Verified by running `migrate`,
   `seed_example` and `check`, and by opening each page with the development server.
 
 **Checkpoint**: every story green, the documentation describes the branch as it stands.
+
+## Review fixes
+
+From the one code review (all low, fixed rather than carried):
+
+- [x] T011 [US1] A group-level error is shown inside its group's fieldset on the rendered page,
+  not only on the context form (COR-001). Red when the template renders fields one by one
+  without the form's non-field errors.
+- [x] T012 [US1] The page makes the same number of queries with two groups as with five
+  (COR-002). Red when a query is added per group.
+- [x] T013 [US1] The record's name and a group's name are escaped on the page (SEC-002). Red when
+  either is marked safe.
+- [x] T014 [US2] README: a record test that looks the record up tells a refused person whether the
+  record exists, and `get_queryset()` makes every refusal a 404 (SEC-001).
