@@ -33,3 +33,10 @@ Did: README "The preferences page", CHANGELOG Unreleased entry, CONTEXT.md term,
 Verified: pre-commit run --all-files passed. No page under docs/ describes the view, so none needed changing.
 Next: full verify.
 Watch: none.
+
+## 2026-10-15T12:21:46Z · Forge · US1
+
+Did: accepted US1 (T001-T004). Implementer ran as an in-turn harness agent (sonnet) in dop-002-us1: sessions_spawn refused every model with "selected account or native runtime is unavailable", as on FS-001; transcripts land under the orchestrator workspace, so dispatched cost is not priced per worktree.
+Verified: receipts green; forge verify green on the merged branch (142 tests); tamper-check flags tests/conftest.py and tests/urls.py, both additive (a document fixture, routes).
+Next: US2.
+Watch: US2 adds AUTH_USER_MODEL=testapp.User; FS-001 tests must stay untouched.
