@@ -66,8 +66,19 @@
       "tasks": [
         {
           "id": "T001",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 2,
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestPreferencesView"
+            ],
+            "commands": [
+              "uv run pytest tests/test_views.py"
+            ],
+            "code": [
+              "object_preferences/views.py:17"
+            ]
+          }
         },
         {
           "id": "T002",

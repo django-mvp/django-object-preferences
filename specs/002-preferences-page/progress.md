@@ -5,3 +5,10 @@ Did: picked FS-002 up from the queue (orchestrated run, claim held for this sess
 Verified: forge verify on a339715 green (lint, typecheck, test, build, conformance, docs). Analyze by hand: every FR-001..019 and SC-001..006 maps to a task; no CRITICAL.
 Next: design review (one reviewer, three lenses).
 Watch: sessions_spawn failed on FS-001; try it first, fall back to in-turn harness agents in their own worktrees.
+
+## 2026-10-15T12:18:35Z · Implementer US1 · T001
+
+Did: PreferencesView GET (get_preferences, get_forms, get_context_data), the page template, test settings (messages app, middleware, context processor) and routes for Project and Document.
+Verified: uv run pytest tests/test_views.py (8 passed); pre-commit run --all-files passed.
+Next: T002 saving.
+Watch: Document fixture added to conftest.

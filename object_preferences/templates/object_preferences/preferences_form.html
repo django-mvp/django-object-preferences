@@ -1,0 +1,29 @@
+{% load i18n %}{% get_current_language as language_code %}
+<!DOCTYPE html>
+<html lang="{{ language_code }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% translate "Preferences" %}</title>
+  </head>
+  <body>
+    <main>
+      <h1>{% blocktranslate %}Preferences for {{ record }}{% endblocktranslate %}</h1>
+      {% if messages %}
+        <ul role="status">
+          {% for message in messages %}<li>{{ message }}</li>{% endfor %}
+        </ul>
+      {% endif %}
+      <form method="post">
+        {% csrf_token %}
+        {% for name, form in forms.items %}
+          <fieldset>
+            <legend>{{ name|capfirst }}</legend>
+            {{ form }}
+          </fieldset>
+        {% endfor %}
+        <button type="submit">{% translate "Save" %}</button>
+      </form>
+    </main>
+  </body>
+</html>

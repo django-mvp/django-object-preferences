@@ -6,6 +6,7 @@ INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
+    "django.contrib.messages",
     "object_preferences",
     "tests.testapp",
 ]
@@ -17,12 +18,24 @@ DATABASES = {
     }
 }
 
+MIDDLEWARE = [
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+]
+
 ROOT_URLCONF = "tests.urls"
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
     },
 ]
 
