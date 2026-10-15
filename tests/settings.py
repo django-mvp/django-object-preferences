@@ -7,6 +7,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "object_preferences",
+    "tests.testapp",
 ]
 
 DATABASES = {

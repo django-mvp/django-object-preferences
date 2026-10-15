@@ -1,6 +1,7 @@
 """App configuration for django-object-preferences."""
 
 from django.apps import AppConfig
+from django.utils.module_loading import autodiscover_modules
 from django.utils.translation import gettext_lazy as _
 
 
@@ -17,3 +18,7 @@ class ObjectPreferencesConfig(AppConfig):
     label = "object_preferences"
     verbose_name = _("Object Preferences")
     default_auto_field = "django.db.models.BigAutoField"
+
+    def ready(self) -> None:
+        """Import each installed app's ``preferences`` module to register its groups."""
+        autodiscover_modules("preferences")

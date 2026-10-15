@@ -1,0 +1,678 @@
+{
+  "feature": "001-declare-and-read-preferences",
+  "branch": "001-declare-and-read-preferences",
+  "repo": "django-mvp/django-object-preferences",
+  "state": "PR_READY",
+  "state_history": [
+    {
+      "state": "QUEUED",
+      "at": "2026-10-15T10:42:30Z",
+      "note": "specification approved on #9 under delegation 49aac6e7; issue graph #7, #11-#14"
+    },
+    {
+      "state": "PLAN",
+      "at": "2026-10-15T10:55:22Z",
+      "note": "picked up from the queue on branch 001-declare-and-read-preferences, up to date with origin/main 9dc15d8; base suite green (1 test)"
+    },
+    {
+      "state": "DESIGN_REVIEW",
+      "at": "2026-10-15T10:55:37Z",
+      "note": "plan, research and tasks committed at 169b578"
+    },
+    {
+      "state": "IMPLEMENT",
+      "at": "2026-10-15T11:09:48Z",
+      "note": "design review applied (D1-D5); plan gate open, plan comment posted on #9"
+    },
+    {
+      "state": "CONVERGE",
+      "at": "2026-10-15T11:32:52Z",
+      "note": "all four stories done"
+    },
+    {
+      "state": "REVIEW",
+      "at": "2026-10-15T11:35:16Z",
+      "note": "converged: ADRs 0001-0002, roadmap R1 delivered, story comments green"
+    },
+    {
+      "state": "PR_READY",
+      "at": "2026-10-15T11:49:29Z",
+      "note": "review applied; walkthrough laid out on #9; marking ready for review"
+    }
+  ],
+  "gates": {
+    "spec": {
+      "approved_by": "delegated review",
+      "at": "2026-10-15T10:42:30Z",
+      "self_resolved": [
+        "commit e934fed3e963902192d1c9e9f4e3642ff968be7c, pull request #9, authority delegation 49aac6e7"
+      ]
+    },
+    "plan": {
+      "approved_by": "open",
+      "at": "2026-10-15T11:09:29Z",
+      "self_resolved": [
+        "plan gate open by default; plan comment posted on #9"
+      ]
+    },
+    "merge": {
+      "approved_by": null,
+      "at": null
+    },
+    "design_review": {
+      "approved_by": "design reviewer (one round)",
+      "at": "2026-10-15T11:08:30Z",
+      "self_resolved": [
+        "DR-001 medium: MultiValueField refused at registration, fields read from a form instance (D1)",
+        "DR-002 low: group name positional-only in change() and get_form() (D3)",
+        "DR-003 low: registration checks form_class().fields, not base_fields (D1)",
+        "DR-004 low: PreferenceRegistry.get_field(model) named and reused (D4)",
+        "DR-005 low: English catalogue added to T005 (D5)",
+        "forms.JSONField string values: stored through prepare_value() (D2)"
+      ]
+    },
+    "review": {
+      "approved_by": "code reviewer (one round) + independent craft-review and craft-security review (approve) + fix cycles verified by Forge",
+      "at": "2026-10-15T14:30:00Z",
+      "self_resolved": [
+        "COR-001 high: cleaned value through DjangoJSONEncoder; test red when prepare_value storage restored (T024)",
+        "COR-003 medium: ISO parse before clean for temporal fields; test red without it (T025)",
+        "COR-002 medium: save() forces update; test red without force_update (T026)",
+        "COR-004 low: registration errors name both forms, and group and form (T027)",
+        "COR-005 low: apps.py docstring within 88 (T028); a line-length test the fix added was removed as a style test",
+        "COR-006 low: unsaved records via ProjectFactory.build() (T029); tamper flags on tests/test_fields.py, tests/factories.py and the test app migration are this authorised change and additive models only",
+        "REV-1 medium: change() binds the form with typed values, JSONField only as JSON text; DST repeated-hour test red before (T030)",
+        "REV-2 medium: read() keeps a stored value only when its cleaned value stores back the same; converting-field tests red before (T031)",
+        "REV-3 low: apply() on an unbound form raises ValueError; test red before (T032)",
+        "REV-4 low: to_stored() docstring rewrapped within 88 (T033)",
+        "security lens on the read path: no further findings (tampering at rest, mass assignment, autoescaping, example settings, supply chain cleared)"
+      ]
+    },
+    "walkthrough": {
+      "approved_by": null,
+      "at": "2026-10-15T11:49:19Z",
+      "self_resolved": []
+    }
+  },
+  "stories": [
+    {
+      "id": "US1",
+      "priority": "P1",
+      "issue": 11,
+      "worktree": null,
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T001",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_smoke.py::TestPackagedApp::test_app_is_installed"
+            ],
+            "commands": [
+              "uv run pytest -q"
+            ],
+            "code": [
+              "tests/testapp/models.py:8"
+            ]
+          }
+        },
+        {
+          "id": "T002",
+          "status": "done",
+          "attempts": 2,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestPreferencesField"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -q"
+            ],
+            "code": [
+              "object_preferences/fields.py:12"
+            ]
+          }
+        },
+        {
+          "id": "T003",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -q"
+            ],
+            "code": [
+              "object_preferences/fields.py:35"
+            ]
+          }
+        },
+        {
+          "id": "T004",
+          "status": "done",
+          "attempts": 2,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestPreferencesField::test_the_test_app_migration_leaves_no_changes_to_make"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -q"
+            ],
+            "code": [
+              "tests/testapp/migrations/0001_initial.py:8"
+            ]
+          }
+        },
+        {
+          "id": "T005",
+          "status": "done",
+          "attempts": 2,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py"
+            ],
+            "commands": [
+              "uv run pre-commit run --all-files"
+            ],
+            "code": [
+              "README.md:63"
+            ]
+          }
+        },
+        {
+          "id": "T029",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -q"
+            ],
+            "code": [
+              "tests/test_fields.py:119"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "US2",
+      "priority": "P1",
+      "issue": 12,
+      "worktree": null,
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T006",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_registry.py::TestPreferenceRegistry"
+            ],
+            "commands": [
+              "uv run pytest tests/test_registry.py -x"
+            ],
+            "code": [
+              "object_preferences/registry.py:120"
+            ]
+          }
+        },
+        {
+          "id": "T007",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_apps.py::TestObjectPreferencesConfig"
+            ],
+            "commands": [
+              "uv run pytest tests/test_apps.py tests/test_registry.py -x"
+            ],
+            "code": [
+              "object_preferences/apps.py:22"
+            ]
+          }
+        },
+        {
+          "id": "T008",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences"
+            ],
+            "commands": [
+              "uv run pytest tests/test_registry.py tests/test_fields.py -q"
+            ],
+            "code": [
+              "object_preferences/fields.py:41"
+            ]
+          }
+        },
+        {
+          "id": "T009",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_apps.py::TestObjectPreferencesConfig::test_registering_and_replacing_a_group_leaves_no_migration_to_make"
+            ],
+            "commands": [
+              "uv run pytest tests/test_apps.py -q"
+            ],
+            "code": [
+              "tests/test_apps.py:17"
+            ]
+          }
+        },
+        {
+          "id": "T010",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv run pre-commit run --all-files"
+            ],
+            "code": [
+              "README.md:73"
+            ]
+          }
+        },
+        {
+          "id": "T020",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_registry.py::TestPreferenceRegistry"
+            ],
+            "commands": [
+              "uv run pytest -n auto",
+              "forge verify --steps docs"
+            ],
+            "code": [
+              "object_preferences/registry.py:1"
+            ]
+          }
+        },
+        {
+          "id": "T023",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_a_model_inheriting_from_one_with_groups_has_none_of_them"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -k inheriting (red with groups looked up on field.model, green restored)",
+              "uv run pytest -n auto"
+            ],
+            "code": [
+              "tests/testapp/models.py:28"
+            ]
+          }
+        },
+        {
+          "id": "T025",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_temporal_values_read_back_when_the_field_accepts_no_iso_format"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py tests/test_registry.py -q"
+            ],
+            "code": [
+              "object_preferences/registry.py:95"
+            ]
+          }
+        },
+        {
+          "id": "T027",
+          "status": "done",
+          "attempts": 2,
+          "evidence": {
+            "tests": [
+              "tests/test_registry.py::TestPreferenceRegistry::test_a_duplicate_name_error_names_the_model_the_name_and_both_forms",
+              "tests/test_registry.py::TestPreferenceRegistry::test_a_model_without_the_field_error_names_the_model_group_and_form"
+            ],
+            "commands": [
+              "uv run pytest tests/test_registry.py -k names_the_model (red before the fix: 2 failed)",
+              "uv run pytest -n auto"
+            ],
+            "code": [
+              "object_preferences/registry.py:185"
+            ]
+          }
+        },
+        {
+          "id": "T028",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "awk 'length > 88' object_preferences/apps.py (no output)"
+            ],
+            "code": [
+              "object_preferences/apps.py:23"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "US3",
+      "priority": "P2",
+      "issue": 13,
+      "worktree": null,
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T011",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_an_unbound_form_starts_from_the_records_current_values,tests/test_fields.py::TestRecordPreferences::test_a_form_given_data_is_bound_and_validates_it"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -x -q -k form"
+            ],
+            "code": [
+              "object_preferences/fields.py:55"
+            ]
+          }
+        },
+        {
+          "id": "T012",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_applied_values_read_back_typed_after_a_save_and_reload,tests/test_fields.py::TestRecordPreferences::test_applying_a_default_removes_the_stored_value_and_the_group,tests/test_fields.py::TestRecordPreferences::test_an_invalid_form_raises_with_the_field_and_its_code,tests/test_fields.py::TestRecordPreferences::test_a_json_preference_set_to_a_string_survives_a_save_and_reload"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py tests/test_registry.py -q"
+            ],
+            "code": [
+              "object_preferences/registry.py:80"
+            ]
+          }
+        },
+        {
+          "id": "T013",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_changing_one_preference_keeps_the_groups_others,tests/test_fields.py::TestRecordPreferences::test_changing_an_undeclared_preference_is_a_key_error_naming_it,tests/test_fields.py::TestRecordPreferences::test_a_preference_called_name_can_be_changed"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -q"
+            ],
+            "code": [
+              "object_preferences/fields.py:109"
+            ]
+          }
+        },
+        {
+          "id": "T014",
+          "status": "done",
+          "attempts": 2,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_a_saved_change_reads_back_after_a_reload,tests/test_fields.py::TestRecordPreferences::test_saving_writes_only_the_preferences,tests/test_fields.py::TestRecordPreferences::test_saving_a_record_that_was_never_saved_raises_and_writes_nothing"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -q"
+            ],
+            "code": [
+              "object_preferences/fields.py:144"
+            ]
+          }
+        },
+        {
+          "id": "T015",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv run python manage.py runserver 8317 --noreload; curl http://127.0.0.1:8317/ (HTTP 200)"
+            ],
+            "code": [
+              "example/preferences.py:11"
+            ]
+          }
+        },
+        {
+          "id": "T016",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv run python manage.py shell (README change/save/ValidationError snippets run against the example project)"
+            ],
+            "code": [
+              "README.md:118"
+            ]
+          }
+        },
+        {
+          "id": "T021",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_applying_a_group_drops_a_stored_key_it_does_not_declare"
+            ],
+            "commands": [
+              "uv run pytest -n auto"
+            ],
+            "code": [
+              "object_preferences/fields.py:1"
+            ]
+          }
+        },
+        {
+          "id": "T024",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_a_datetime_reads_as_the_instant_written_under_another_timezone"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py tests/test_registry.py -q"
+            ],
+            "code": [
+              "object_preferences/registry.py:100"
+            ]
+          }
+        },
+        {
+          "id": "T026",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_saving_a_record_with_a_default_key_that_was_never_saved_raises"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -q"
+            ],
+            "code": [
+              "object_preferences/fields.py:132"
+            ]
+          }
+        },
+        {
+          "id": "T030",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_changing_a_sibling_keeps_a_datetime_stored_in_a_repeated_hour"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -q (red: ValidationError on 2026-11-01 01:30 America/Chicago; green after)"
+            ],
+            "code": [
+              "object_preferences/fields.py:146"
+            ]
+          }
+        },
+        {
+          "id": "T032",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_applying_an_unbound_form_is_a_value_error"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -q (red: ValidationError({}); green after)"
+            ],
+            "code": [
+              "object_preferences/fields.py:105"
+            ]
+          }
+        },
+        {
+          "id": "T033",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "awk 'length > 88' object_preferences/*.py (no output)"
+            ],
+            "code": [
+              "object_preferences/registry.py:126"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "US4",
+      "priority": "P2",
+      "issue": 14,
+      "worktree": null,
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T017",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences"
+            ],
+            "commands": [
+              "uv run pytest tests/test_registry.py::TestPreferenceGroup tests/test_fields.py::TestRecordPreferences"
+            ],
+            "code": [
+              "object_preferences/fields.py:46"
+            ]
+          }
+        },
+        {
+          "id": "T018",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_a_stale_stored_value_is_not_stored_after_the_group_is_changed"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -k stale_stored_value_is_not_stored"
+            ],
+            "code": [
+              "object_preferences/fields.py:46"
+            ]
+          }
+        },
+        {
+          "id": "T019",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "curl -s http://127.0.0.1:8731/ (runserver 8731 --noreload, stopped afterwards)"
+            ],
+            "code": [
+              "example/management/commands/seed_example.py:30"
+            ]
+          }
+        },
+        {
+          "id": "T022",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_registry.py::TestPreferenceGroup"
+            ],
+            "commands": [
+              "uv run pytest -n auto",
+              "forge roadmap-status --pending 7,11,12,13,14 --apply"
+            ],
+            "code": [
+              "object_preferences/registry.py:1",
+              "docs/adr/0001-preferences-are-stored-on-the-record.md:1"
+            ]
+          }
+        },
+        {
+          "id": "T031",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_registry.py::TestPreferenceGroup::test_a_stored_value_its_field_would_convert_reads_the_default",
+              "tests/test_fields.py::TestRecordPreferences::test_changing_a_sibling_drops_a_stale_value_its_field_would_convert"
+            ],
+            "commands": [
+              "uv run pytest -q (red before the fix, 120 passed after)"
+            ],
+            "code": [
+              "object_preferences/registry.py:73"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "budgets": {
+    "converge_cycles": {
+      "used": 1,
+      "max": 2
+    },
+    "review_cycles": {
+      "used": 1,
+      "max": 1
+    },
+    "tokens": {
+      "used": 0,
+      "max": 120
+    },
+    "design_review_cycles": {
+      "used": 1,
+      "max": 1
+    }
+  },
+  "pr": {
+    "number": 9,
+    "draft": false
+  }
+}

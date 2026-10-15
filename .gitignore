@@ -63,3 +63,4 @@ env.bak/
 venv.bak/
 
 dist
+example/db.sqlite3

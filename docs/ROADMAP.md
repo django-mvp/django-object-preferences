@@ -25,21 +25,11 @@ Everything needed to reach a minimum usable release.
 
 ### R1 — Preferences declared for a model and read from its records
 
-*feature · advances G1, G2, G3*
+*delivered in [#7](https://github.com/django-mvp/django-object-preferences/issues/7) · advances G1, G2, G3*
 
-The foundation everything else builds on. A host project turns preferences on for a model it owns, and any installed app can then declare a group of preferences for that model and read them back from any of its records. It comes first because the editing page and everything after it read and write what this item defines.
+A host project turns preferences on for a model it owns by adding one field, at the cost of one migration. Any installed app declares a named group of preferences for that model with an ordinary Django form in its `preferences.py`, and the package finds it at start-up. Every record reads its preferences without a database query, typed as the form's fields produce them. A preference nobody changed reads its current default, and stored values that no longer fit read the default instead of raising. Code changes and saves preferences with the form's own validation. The README and a small example project show all of it, and the editing page and everything after it build on this.
 
-**Deliverables:**
-
-- A host project can turn preferences on for any model it owns, at the cost of a single migration on that model.
-- Any installed app can declare a named group of preferences for a model, each preference with a type, validation and a default, and the package finds those declarations without the host project listing them.
-- Reading a preference from a record already loaded makes no further database query.
-- A preference nobody has changed reads its current default, so changing a default reaches every record still on it.
-- A stored value that no longer matches its declaration, or belongs to a preference that no longer exists, never raises. The current default is used instead.
-- Preferences can be changed and saved from code, with the same validation a person would meet on a page.
-- A small example project and README documentation showing a preference declared, read and changed.
-
-Serves G1, G2 and G3. Out of scope: any page or view, and model inheritance beyond the model a group was declared for.
+Serves G1, G2 and G3.
 
 ### R2 — A page to change a record's preferences
 
