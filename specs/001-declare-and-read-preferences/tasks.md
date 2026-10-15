@@ -172,16 +172,16 @@ every preference.
 
 ## Review fixes
 
-- [ ] T024 [US3] A `DateTimeField` preference keeps its instant whatever timezone is active when
+- [x] T024 [US3] A `DateTimeField` preference keeps its instant whatever timezone is active when
   it is read: store the cleaned value, not its `prepare_value()` rendering (review COR-001, high).
-- [ ] T025 [US2] A date, time or datetime preference whose field declares `input_formats` without
+- [x] T025 [US2] A date, time or datetime preference whose field declares `input_formats` without
   ISO reads back what was stored (review COR-003).
-- [ ] T026 [US3] `save()` on a record never saved raises even when its primary key has a default,
+- [x] T026 [US3] `save()` on a record never saved raises even when its primary key has a default,
   instead of inserting the record (review COR-002).
-- [ ] T027 [US2] Registration errors name both declarations of a duplicate group, and the group
+- [x] T027 [US2] Registration errors name both declarations of a duplicate group, and the group
   and form when the model has no preferences field (review COR-004).
-- [ ] T028 [US2] `ObjectPreferencesConfig.ready()` docstring within 88 characters (review COR-005).
-- [ ] T029 [US1] Unsaved records in tests come from `ProjectFactory.build()` (review COR-006).
+- [x] T028 [US2] `ObjectPreferencesConfig.ready()` docstring within 88 characters (review COR-005).
+- [x] T029 [US1] Unsaved records in tests come from `ProjectFactory.build()` (review COR-006).
 
 ## Dependencies and order
 

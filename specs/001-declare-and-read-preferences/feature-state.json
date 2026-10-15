@@ -312,16 +312,18 @@
         {
           "id": "T027",
           "status": "done",
-          "attempts": 1,
+          "attempts": 2,
           "evidence": {
             "tests": [
-              "tests/test_registry.py::TestPreferenceRegistry::test_a_duplicate_name_error_names_the_model_the_name_and_both_forms,tests/test_registry.py::TestPreferenceRegistry::test_a_model_without_the_field_error_names_the_model_group_and_form"
+              "tests/test_registry.py::TestPreferenceRegistry::test_a_duplicate_name_error_names_the_model_the_name_and_both_forms",
+              "tests/test_registry.py::TestPreferenceRegistry::test_a_model_without_the_field_error_names_the_model_group_and_form"
             ],
             "commands": [
-              "uv run pytest tests/test_registry.py tests/test_fields.py -q"
+              "uv run pytest tests/test_registry.py -k names_the_model (red before the fix: 2 failed)",
+              "uv run pytest -n auto"
             ],
             "code": [
-              "object_preferences/registry.py:165"
+              "object_preferences/registry.py:185"
             ]
           }
         },
