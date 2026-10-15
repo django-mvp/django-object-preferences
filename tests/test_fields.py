@@ -16,7 +16,7 @@ from django.db.migrations.state import ProjectState
 
 from object_preferences.fields import PreferencesField
 from object_preferences.registry import registry
-from tests.testapp.models import Project
+from tests.testapp.models import Project, ProjectProxy
 
 
 def graph_with_testapp_migrated() -> MigrationGraph:
@@ -578,3 +578,12 @@ class TestRecordPreferences:
 
         reloaded = Project.objects.get(pk=project.pk)
         assert reloaded.preferences.stored == {"display": {"page_size": 60}}
+
+    def test_a_model_inheriting_from_one_with_groups_has_none_of_them(
+        self, project
+    ) -> None:
+        inheriting = ProjectProxy.objects.get(pk=project.pk)
+
+        assert list(inheriting.preferences) == []
+        with pytest.raises(KeyError, match="display"):
+            inheriting.preferences["display"]

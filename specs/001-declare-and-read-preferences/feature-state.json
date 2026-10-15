@@ -2,7 +2,7 @@
   "feature": "001-declare-and-read-preferences",
   "branch": "001-declare-and-read-preferences",
   "repo": "django-mvp/django-object-preferences",
-  "state": "IMPLEMENT",
+  "state": "CONVERGE",
   "state_history": [
     {
       "state": "QUEUED",
@@ -23,6 +23,11 @@
       "state": "IMPLEMENT",
       "at": "2026-10-15T11:09:48Z",
       "note": "design review applied (D1-D5); plan gate open, plan comment posted on #9"
+    },
+    {
+      "state": "CONVERGE",
+      "at": "2026-10-15T11:32:52Z",
+      "note": "all four stories done"
     }
   ],
   "gates": {
@@ -249,6 +254,23 @@
               "object_preferences/registry.py:1"
             ]
           }
+        },
+        {
+          "id": "T023",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_a_model_inheriting_from_one_with_groups_has_none_of_them"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -k inheriting (red with groups looked up on field.model, green restored)",
+              "uv run pytest -n auto"
+            ],
+            "code": [
+              "tests/testapp/models.py:28"
+            ]
+          }
         }
       ]
     },
@@ -420,13 +442,31 @@
               "example/management/commands/seed_example.py:30"
             ]
           }
+        },
+        {
+          "id": "T022",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_registry.py::TestPreferenceGroup"
+            ],
+            "commands": [
+              "uv run pytest -n auto",
+              "forge roadmap-status --pending 7,11,12,13,14 --apply"
+            ],
+            "code": [
+              "object_preferences/registry.py:1",
+              "docs/adr/0001-preferences-are-stored-on-the-record.md:1"
+            ]
+          }
         }
       ]
     }
   ],
   "budgets": {
     "converge_cycles": {
-      "used": 0,
+      "used": 1,
       "max": 2
     },
     "review_cycles": {

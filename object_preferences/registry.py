@@ -100,7 +100,7 @@ class PreferenceGroup:
         Returns:
             The values to store, by preference name.
         """
-        defaults = self.defaults(self.form_class())
+        defaults = self.defaults()
         stored = {}
         for name, field in form.fields.items():
             value = form.cleaned_data[name]

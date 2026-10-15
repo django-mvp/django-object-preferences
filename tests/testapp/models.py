@@ -25,3 +25,10 @@ class Plain(models.Model):
         help_text=_("What the record is called."),
         max_length=100,
     )
+
+
+class ProjectProxy(Project):
+    """A model that inherits from one with preferences declared."""
+
+    class Meta:
+        proxy = True

@@ -160,6 +160,16 @@ every preference.
 
 **Checkpoint**: the feature is complete.
 
+## Convergence
+
+- [x] T022 [US4] Simplification pass over the whole feature: `to_stored()` takes its defaults
+  from `defaults()` with no form, the two decisions that meet the bar graduate to
+  `docs/adr/0001` and `docs/adr/0002`, and the roadmap records R1 as delivered.
+
+- [x] T023 [US2] Convergence gap: a test that a model inheriting from one with groups has none of
+  them (spec, edge cases), with a proxy of `Project` in the test app. Shown red by making the
+  accessor look groups up on the field's model instead of the record's.
+
 ## Dependencies and order
 
 - Stories run in order, one at a time: US2 reads through the field US1 adds, US3 changes what US2

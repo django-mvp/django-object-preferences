@@ -261,3 +261,30 @@ attribution, because the transcripts land with this session rather than under ea
 **Revisit if**: spawning works again, at which point the remaining stories go back to it.
 
 **ADR:** none — a one-off workaround for a tooling outage, nothing in the package
+
+## D7 — Where preferences are stored, and how they are read
+
+**Decision**: the spec's decisions on storage ("One field on the record holds only stored values",
+"The default comes from the field", "Reads come back typed", "Unknown keys are ignored, stale
+values fall back") together with the accessor design in `research.md` §2 are one standing rule
+for the package.
+
+**Why**: every later feature reads and writes through it, and a reasonable engineer would ask why
+preferences are not columns or rows.
+
+**Revisit if**: preferences need to be queryable, which the constitution rules out.
+
+**ADR:** docs/adr/0001-preferences-are-stored-on-the-record.md
+
+## D8 — How preference groups are declared
+
+**Decision**: the spec's decisions "A group is a Django form, registered like a model admin" and
+"Group names are unique per model, and clashes stop the project starting", with D1 and D3, are one
+standing rule for how apps declare preferences.
+
+**Why**: it is the package's public interface for every app that declares preferences, and FS-002
+and later features build on it.
+
+**Revisit if**: model inheritance (R3) changes which model a group applies to.
+
+**ADR:** docs/adr/0002-preference-groups-are-forms-registered-like-model-admins.md
