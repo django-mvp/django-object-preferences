@@ -310,8 +310,19 @@
         },
         {
           "id": "T014",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 2,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_a_saved_change_reads_back_after_a_reload,tests/test_fields.py::TestRecordPreferences::test_saving_writes_only_the_preferences,tests/test_fields.py::TestRecordPreferences::test_saving_a_record_that_was_never_saved_raises_and_writes_nothing"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -q"
+            ],
+            "code": [
+              "object_preferences/fields.py:144"
+            ]
+          }
         },
         {
           "id": "T015",

@@ -141,6 +141,14 @@ class RecordPreferences(Mapping[str, Mapping[str, Any]]):
             ),
         )
 
+    def save(self) -> None:
+        """Write the record's preferences to the database, and nothing else.
+
+        Raises:
+            ValueError: If the record has never been saved.
+        """
+        self.record.save(update_fields=[self.field.attname])
+
     def __iter__(self) -> Iterator[str]:
         """Iterate over the names of the groups declared for the record's model."""
         return iter(group.name for group in registry.get_groups(type(self.record)))

@@ -9,6 +9,7 @@ from django import forms
 from django.apps import apps
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.core.management import call_command
+from django.db import transaction
 from django.db.migrations.autodetector import MigrationAutodetector
 from django.db.migrations.graph import MigrationGraph
 from django.db.migrations.state import ProjectState
@@ -491,3 +492,32 @@ class TestRecordPreferences:
         project.preferences.change("identity", name="Atlas")
 
         assert project.preferences["identity"]["name"] == "Atlas"
+
+    def test_a_saved_change_reads_back_after_a_reload(self, project) -> None:
+        project.preferences.change("display", theme="dark")
+
+        project.preferences.save()
+
+        reloaded = Project.objects.get(pk=project.pk)
+        assert reloaded.preferences["display"]["theme"] == "dark"
+
+    def test_saving_writes_only_the_preferences(self, project) -> None:
+        project.name = "Renamed"
+        project.preferences.change("display", theme="dark")
+
+        project.preferences.save()
+
+        reloaded = Project.objects.get(pk=project.pk)
+        assert reloaded.name != "Renamed"
+        assert reloaded.preferences["display"]["theme"] == "dark"
+
+    def test_saving_a_record_that_was_never_saved_raises_and_writes_nothing(
+        self, db
+    ) -> None:
+        record = Project(name="New")
+        record.preferences.change("display", theme="dark")
+
+        with transaction.atomic(), pytest.raises(ValueError):
+            record.preferences.save()
+
+        assert Project.objects.count() == 0

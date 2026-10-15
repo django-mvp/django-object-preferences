@@ -96,3 +96,10 @@ Did: RecordPreferences.change with tests.
 Verified: uv run pytest tests/test_fields.py, 53 passed; pre-commit and mypy clean.
 Next: T014 save.
 Watch: none.
+
+## 2026-10-15T11:25:24Z · Implementer US3 · T014
+
+Did: RecordPreferences.save with tests.
+Verified: uv run pytest tests/test_fields.py, 56 passed; pre-commit and mypy clean.
+Next: T015 example project.
+Watch: the never-saved test wraps save in transaction.atomic because Django marks the surrounding test transaction for rollback when save raises.
