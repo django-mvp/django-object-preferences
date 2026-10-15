@@ -70,13 +70,17 @@ class PreferenceGroup:
                 defaults[name] = field.to_python(value)
         return defaults
 
-    def read(self, stored: Any) -> dict[str, Any]:
+    def read(
+        self, stored: Any, encoder: type[json.JSONEncoder] | None
+    ) -> dict[str, Any]:
         """Return every preference of the group, typed as its field produces it.
 
         Args:
             stored: The values stored for this group. Anything but a dictionary
-                reads as nothing stored, and a stored value the field no longer
-                accepts reads as the default.
+                reads as nothing stored. A stored value the field no longer
+                accepts, or would only accept by converting it, reads as the
+                default.
+            encoder: The JSON encoder of the record's preferences field.
 
         Returns:
             Each preference's value by name, stored or default.
@@ -94,8 +98,34 @@ class PreferenceGroup:
                     for field_class, parser in TEMPORAL_PARSERS:
                         if isinstance(field, field_class) and isinstance(value, str):
                             value = parser(value) or value
-                    values[name] = field.clean(value)
+                    cleaned = field.clean(value)
+                    # A field converts some values it was never given, such as a
+                    # list for a CharField, so only a value that stores back the
+                    # same is the one that was written.
+                    if self.encode(field, cleaned, encoder) == stored[name]:
+                        values[name] = cleaned
         return values
+
+    @staticmethod
+    def encode(
+        field: forms.Field, value: Any, encoder: type[json.JSONEncoder] | None
+    ) -> Any:
+        """Return a cleaned value as the database returns it once stored.
+
+        Args:
+            field: The form field the value was cleaned by.
+            value: The cleaned value.
+            encoder: The JSON encoder of the record's preferences field.
+
+        Returns:
+            The value after a round trip through JSON.
+        """
+        # A JSONField value is kept as its JSON text, so a plain string reads
+        # back as itself. Every other value goes through the encoder whole,
+        # which keeps a datetime's offset.
+        if isinstance(field, forms.JSONField):
+            value = field.prepare_value(value)
+        return json.loads(json.dumps(value, cls=encoder))
 
     def to_stored(
         self, form: forms.BaseForm, encoder: type[json.JSONEncoder] | None
@@ -103,7 +133,7 @@ class PreferenceGroup:
         """Return what a valid form of the group leaves stored on a record.
 
         Only values that differ from their default are kept, in the form the
-        database returns them (the cleaned value, run through the encoder), so that the record reads the same before and
+        database returns them, so that the record reads the same before and
         after it is saved.
 
         Args:
@@ -118,12 +148,7 @@ class PreferenceGroup:
         for name, field in form.fields.items():
             value = form.cleaned_data[name]
             if value != defaults[name]:
-                # A JSONField value is kept as its JSON text, so a plain string
-                # reads back as itself. Every other value goes through the encoder
-                # whole, which keeps a datetime's offset.
-                if isinstance(field, forms.JSONField):
-                    value = field.prepare_value(value)
-                stored[name] = json.loads(json.dumps(value, cls=encoder))
+                stored[name] = self.encode(field, value, encoder)
         return stored
 
 

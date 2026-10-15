@@ -208,3 +208,10 @@ Did: walkthrough laid out on the pull request, description rewritten with the cl
 Verified: verify green, story comments green, walkthrough required for the example page (4 states), example served on port 8028.
 Next: mark ready for review, wait for checks, hand over at the merge gate.
 Watch: nothing outstanding.
+
+## 2026-10-15T14:30:00Z · Forge · S6
+
+Did: second, independent review at the orchestrator's request, by an in-turn harness agent briefed with craft-review and craft-security for the read path (gateway spawns were refused with "the selected account or native runtime is unavailable", so the stories and the first review also ran as in-turn agents). Verdict approve, with 2 medium and 2 low, all fixed as T030-T033. The security lens found nothing further.
+Verified: each new test red before its fix (ValidationError in the repeated 01:30 hour in America/Chicago; list and word read as converted values; ValidationError({}) for an unbound form); `uv run pytest -n auto` 120 passed; forge verify green with docs against origin/main.
+Next: push, checks, merge gate to the orchestrator.
+Watch: nothing outstanding.

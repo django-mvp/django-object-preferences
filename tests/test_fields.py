@@ -95,10 +95,20 @@ class MomentForm(forms.Form):
     moment = forms.DateTimeField(required=False)
 
 
+class TimedForm(forms.Form):
+    moment = forms.DateTimeField(required=False)
+    count = forms.IntegerField(initial=1)
+
+
 class DayFirstForm(forms.Form):
     day = forms.DateField(required=False, input_formats=["%d/%m/%Y"])
     time = forms.TimeField(required=False, input_formats=["%H.%M"])
     moment = forms.DateTimeField(required=False, input_formats=["%d/%m/%Y %H.%M"])
+
+
+class ConvertingForm(forms.Form):
+    label = forms.CharField(initial="none")
+    enabled = forms.BooleanField(required=False)
 
 
 class NamedForm(forms.Form):
@@ -380,6 +390,12 @@ class TestRecordPreferences:
         codes = [e.code for e in raised.value.error_dict[NON_FIELD_ERRORS]]
         assert codes == ["inverted"]
 
+    def test_applying_an_unbound_form_is_a_value_error(self, project) -> None:
+        form = project.preferences.get_form("display")
+
+        with pytest.raises(ValueError, match="bound"):
+            project.preferences.apply("display", form)
+
     def test_a_form_of_another_class_is_a_type_error(self, project) -> None:
         form = ChangedDisplayForm({"theme": "dark", "page_size": "50"})
 
@@ -458,6 +474,29 @@ class TestRecordPreferences:
 
         with timezone.override("America/New_York"):
             assert reloaded.preferences["moments"]["moment"] == written
+
+    def test_changing_a_sibling_keeps_a_datetime_stored_in_a_repeated_hour(
+        self, project, preference_registry
+    ) -> None:
+        registry.register(Project, "timed", TimedForm)
+        moment = datetime.datetime(2026, 11, 1, 6, 30, tzinfo=datetime.UTC)
+        with timezone.override("UTC"):
+            project.preferences.change("timed", moment=moment)
+
+        with timezone.override("America/Chicago"):
+            project.preferences.change("timed", count=5)
+
+        assert project.preferences["timed"] == {"moment": moment, "count": 5}
+
+    def test_changing_a_sibling_drops_a_stale_value_its_field_would_convert(
+        self, project, preference_registry
+    ) -> None:
+        registry.register(Project, "converting", ConvertingForm)
+        project.preferences = {"converting": {"label": ["a", "b"]}}
+
+        project.preferences.change("converting", enabled=True)
+
+        assert project.preferences.stored == {"converting": {"enabled": True}}
 
     def test_temporal_values_read_back_when_the_field_accepts_no_iso_format(
         self, project, preference_registry

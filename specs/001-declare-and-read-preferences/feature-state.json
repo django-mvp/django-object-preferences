@@ -72,15 +72,20 @@
       ]
     },
     "review": {
-      "approved_by": "code reviewer (one round) + fix cycle verified by Forge",
-      "at": "2026-10-15T11:47:48Z",
+      "approved_by": "code reviewer (one round) + independent craft-review and craft-security review (approve) + fix cycles verified by Forge",
+      "at": "2026-10-15T14:30:00Z",
       "self_resolved": [
         "COR-001 high: cleaned value through DjangoJSONEncoder; test red when prepare_value storage restored (T024)",
         "COR-003 medium: ISO parse before clean for temporal fields; test red without it (T025)",
         "COR-002 medium: save() forces update; test red without force_update (T026)",
         "COR-004 low: registration errors name both forms, and group and form (T027)",
         "COR-005 low: apps.py docstring within 88 (T028); a line-length test the fix added was removed as a style test",
-        "COR-006 low: unsaved records via ProjectFactory.build() (T029); tamper flags on tests/test_fields.py, tests/factories.py and the test app migration are this authorised change and additive models only"
+        "COR-006 low: unsaved records via ProjectFactory.build() (T029); tamper flags on tests/test_fields.py, tests/factories.py and the test app migration are this authorised change and additive models only",
+        "REV-1 medium: change() binds the form with typed values, JSONField only as JSON text; DST repeated-hour test red before (T030)",
+        "REV-2 medium: read() keeps a stored value only when its cleaned value stores back the same; converting-field tests red before (T031)",
+        "REV-3 low: apply() on an unbound form raises ValueError; test red before (T032)",
+        "REV-4 low: to_stored() docstring rewrapped within 88 (T033)",
+        "security lens on the read path: no further findings (tampering at rest, mass assignment, autoescaping, example settings, supply chain cleared)"
       ]
     },
     "walkthrough": {
@@ -509,6 +514,51 @@
               "object_preferences/fields.py:132"
             ]
           }
+        },
+        {
+          "id": "T030",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_changing_a_sibling_keeps_a_datetime_stored_in_a_repeated_hour"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -q (red: ValidationError on 2026-11-01 01:30 America/Chicago; green after)"
+            ],
+            "code": [
+              "object_preferences/fields.py:146"
+            ]
+          }
+        },
+        {
+          "id": "T032",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_applying_an_unbound_form_is_a_value_error"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -q (red: ValidationError({}); green after)"
+            ],
+            "code": [
+              "object_preferences/fields.py:105"
+            ]
+          }
+        },
+        {
+          "id": "T033",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "awk 'length > 88' object_preferences/*.py (no output)"
+            ],
+            "code": [
+              "object_preferences/registry.py:126"
+            ]
+          }
         }
       ]
     },
@@ -580,6 +630,23 @@
             "code": [
               "object_preferences/registry.py:1",
               "docs/adr/0001-preferences-are-stored-on-the-record.md:1"
+            ]
+          }
+        },
+        {
+          "id": "T031",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_registry.py::TestPreferenceGroup::test_a_stored_value_its_field_would_convert_reads_the_default",
+              "tests/test_fields.py::TestRecordPreferences::test_changing_a_sibling_drops_a_stale_value_its_field_would_convert"
+            ],
+            "commands": [
+              "uv run pytest -q (red before the fix, 120 passed after)"
+            ],
+            "code": [
+              "object_preferences/registry.py:73"
             ]
           }
         }

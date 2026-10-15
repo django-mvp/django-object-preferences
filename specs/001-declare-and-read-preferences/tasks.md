@@ -182,6 +182,12 @@ every preference.
   and form when the model has no preferences field (review COR-004).
 - [x] T028 [US2] `ObjectPreferencesConfig.ready()` docstring within 88 characters (review COR-005).
 - [x] T029 [US1] Unsaved records in tests come from `ProjectFactory.build()` (review COR-006).
+- [x] T030 [US3] A change to one preference keeps a stored datetime that falls in an hour the
+  active timezone repeats: `change()` binds the form with typed values (second review REV-1).
+- [x] T031 [US4] A stale value its new field would only accept by converting it reads the default,
+  and a later change does not store the conversion (second review REV-2).
+- [x] T032 [US3] `apply()` on a form bound to no data raises `ValueError` (second review REV-3).
+- [x] T033 [US3] `to_stored()` docstring within 88 characters (second review REV-4).
 
 ## Dependencies and order
 

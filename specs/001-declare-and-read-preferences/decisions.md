@@ -183,8 +183,9 @@ error itself
 
 **Decision**: a changed value is stored as its cleaned value run through `DjangoJSONEncoder`, so a
 datetime keeps its offset. The one exception is `forms.JSONField`, whose value is stored as the
-field's `prepare_value()` (its JSON text). A change from code still binds the form with
-`prepare_value()` of each current value, which happens inside one call under one active timezone.
+field's `prepare_value()` (its JSON text). A change from code binds the form with each current
+value as it reads, typed, and only a `forms.JSONField` value goes in as its JSON text. A read
+keeps a stored value only when its cleaned value stores back as exactly that value.
 
 **Why**: the first rule stored `prepare_value()` for every field, on the reasoning that it is the
 field's own answer to "what does my value look like as form data". The code review (COR-001)
@@ -196,6 +197,15 @@ A date, time or datetime field that declares `input_formats` without ISO cannot 
 string the encoder stored (COR-003), so a read parses a stored string with
 `django.utils.dateparse` first and cleans the parsed object, which every temporal form field
 accepts whatever its `input_formats`.
+
+The second review (REV-1) found that binding the form with `prepare_value()` of every current
+value turns a stored datetime into a naive time in the active timezone, which the form cannot
+read when that time falls in an hour the clocks repeat or skip. Every change to the group then
+failed. A typed value is valid form data for every supported field, so it goes in as it is. The
+same review (REV-2) found that a field converts some values it was never meant to accept: a
+`CharField` takes a list as its text, and a `BooleanField` takes any word as true. A stale value
+of the wrong type then read as that conversion, and the next change stored it. Comparing the
+re-stored cleaned value with the stored one tells the two apart without a rule per field.
 
 **Revisit if**: a field's encoded cleaned value turns out not to be valid input to its own
 `clean()`.

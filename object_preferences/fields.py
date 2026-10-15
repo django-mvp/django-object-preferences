@@ -55,7 +55,10 @@ class RecordPreferences(Mapping[str, Mapping[str, Any]]):
         group = registry.get_group(type(self.record), name)
         stored = self.stored
         return MappingProxyType(
-            group.read(stored.get(name, {}) if isinstance(stored, dict) else {})
+            group.read(
+                stored.get(name, {}) if isinstance(stored, dict) else {},
+                self.field.encoder,
+            )
         )
 
     def get_form(
@@ -94,6 +97,7 @@ class RecordPreferences(Mapping[str, Mapping[str, Any]]):
         Raises:
             KeyError: If no group of that name is declared for the record's model.
             TypeError: If the form is not an instance of the group's form class.
+            ValueError: If the form is not bound to submitted data.
             ValidationError: If the form is not valid, with the form's errors.
         """
         group = registry.get_group(type(self.record), name)
@@ -102,6 +106,8 @@ class RecordPreferences(Mapping[str, Mapping[str, Any]]):
                 f"Expected a {group.form_class.__name__} for group {name!r}, "
                 f"not a {type(form).__name__}."
             )
+        if not form.is_bound:
+            raise ValueError(f"The form for group {name!r} is not bound to any data.")
         if not form.is_valid():
             raise ValidationError(form.errors.as_data())
         stored = self.stored
@@ -137,12 +143,13 @@ class RecordPreferences(Mapping[str, Mapping[str, Any]]):
                 f"group {name!r} of {type(self.record)._meta.label}."
             )
         data = {**self[name], **values}
-        self.apply(
-            name,
-            self.get_form(
-                name, data={key: fields[key].prepare_value(data[key]) for key in fields}
-            ),
-        )
+        # Typed values go to the form as they are: a datetime prepared as text
+        # in the active timezone can land in an hour that is ambiguous there.
+        # Only a JSONField needs its value as JSON text.
+        for key, field in fields.items():
+            if isinstance(field, forms.JSONField):
+                data[key] = field.prepare_value(data[key])
+        self.apply(name, self.get_form(name, data=data))
 
     def save(self) -> None:
         """Write the record's preferences to the database, and nothing else.

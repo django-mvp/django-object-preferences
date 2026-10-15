@@ -143,12 +143,13 @@ and `object_preferences.registry`, which is where a Django developer reading the
   widget's empty-submission value when that is `None`, passed through `field.clean()`, falling back
   to `field.to_python()` of the same value when cleaning raises `ValidationError`
   (`research.md` §4).
-- `PreferenceGroup.read(stored)`: instantiates `form_class()`, takes its defaults, and for each
-  field with a key in `stored` uses `field.clean(stored[name])` instead. US2 assumes `stored` is
+- `PreferenceGroup.read(stored, encoder)`: instantiates `form_class()`, takes its defaults, and
+  for each field with a key in `stored` uses `field.clean(stored[name])` instead, when that
+  cleaned value stores back as `stored[name]` (`decisions.md` D2). US2 assumes `stored` is
   a dict of values that clean. US4 adds the tolerance: a value that raises anything on cleaning
   reads as the default, and a `stored` that is not a dict reads as empty.
 - `RecordPreferences.__getitem__(name)`: `registry.get_group(type(self.record), name)`, then
-  `MappingProxyType(group.read(<the stored dict's entry for name>))`. US4 makes a stored root that
+  `MappingProxyType(group.read(<the stored dict's entry for name>, self.field.encoder))`. US4 makes a stored root that
   is not a dict read as empty.
 - `__iter__` and `__len__` over `registry.get_groups(type(self.record))` names.
 
@@ -159,17 +160,19 @@ and `object_preferences.registry`, which is where a Django developer reading the
   values. Unbound when `data` is `None`.
 - `PreferenceGroup.to_stored(form, encoder)`: from `form.cleaned_data`, only the group's declared
   fields, only values that differ from `defaults()` of a fresh `form_class()`, each passed through
-  the field's own `prepare_value()` (what the form would render it as, which turns a
-  `forms.JSONField` value into its JSON text) and then
+  `PreferenceGroup.encode()`: a `forms.JSONField` value becomes its JSON text through the
+  field's `prepare_value()`, and every value then goes through
   `json.loads(json.dumps(value, cls=encoder))`, so the in-memory value equals what the database
   will return and reads back through `field.clean()` (`decisions.md` D2).
 - `RecordPreferences.apply(name, form)`: `TypeError` unless `isinstance(form,
-  group.form_class)`. `ValidationError(form.errors.as_data())` unless `form.is_valid()`. Then a copy
+  group.form_class)`. `ValueError` unless `form.is_bound`. `ValidationError(form.errors.as_data())` unless
+  `form.is_valid()`. Then a copy
   of the stored dict (a new dict when it is not one) with `stored[name]` replaced by
   `to_stored()`, or removed when that is empty, assigned back through the descriptor.
 - `RecordPreferences.change(name, /, **values)`: `KeyError` for a key not in the group's form
   fields, naming it. Otherwise `apply()` on `get_form()` bound to the current values with
-  `values` laid over them, each passed through its field's `prepare_value()`. The group name is
+  `values` laid over them, typed, with only a `forms.JSONField` value passed through its
+  field's `prepare_value()`. The group name is
   positional-only so a preference may itself be called `name` (`decisions.md` D3).
 - `RecordPreferences.save()`: `self.record.save(update_fields=[self.field.attname])`.
 

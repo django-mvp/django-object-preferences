@@ -230,8 +230,9 @@ if form.is_valid():
     project.preferences.save()
 ```
 
-`apply` raises a `TypeError` for a form that is not the group's own, and the
-same `ValidationError` as `change` for an invalid one. Applying a group
+`apply` raises a `TypeError` for a form that is not the group's own, a
+`ValueError` for a form bound to no data, and the same `ValidationError` as
+`change` for an invalid one. Applying a group
 replaces that group's stored values and leaves every other group alone, and it
 drops stored keys that the group no longer declares. A `JSONField` preference is
 stored as the JSON text its form field shows, and reads back as the value you
@@ -245,7 +246,8 @@ because of what is stored:
 
 - A stored value the field no longer accepts reads the default. That covers a
   choice you removed, a number above a lowered maximum and a value of a changed
-  type.
+  type, including one the new field would only accept by converting it, such as
+  a list stored for what is now a text field.
 - A stored preference or group that is no longer declared is ignored. It stays
   in the stored dictionary until its group is saved.
 - A stored dictionary, or a group's entry in it, that is not a dictionary reads

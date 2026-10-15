@@ -7,6 +7,7 @@ import uuid
 import pytest
 from django import forms
 from django.core.exceptions import ImproperlyConfigured
+from django.core.serializers.json import DjangoJSONEncoder
 
 from object_preferences.fields import PreferencesField
 from object_preferences.registry import PreferenceGroup, PreferenceRegistry
@@ -181,6 +182,11 @@ class RetypedForm(forms.Form):
     page_size = forms.DateField(initial=datetime.date(2026, 1, 1))
 
 
+class ConvertingForm(forms.Form):
+    label = forms.CharField(initial="none")
+    enabled = forms.BooleanField(required=False)
+
+
 class OrderedForm(forms.Form):
     low = forms.IntegerField(initial=1)
     high = forms.IntegerField(initial=10)
@@ -234,7 +240,7 @@ class TestPreferenceGroup:
     def test_read_gives_the_default_for_a_preference_with_nothing_stored(self) -> None:
         group = PreferenceGroup(Project, "display", ProjectDisplayForm)
 
-        values = group.read({"theme": "dark"})
+        values = group.read({"theme": "dark"}, DjangoJSONEncoder)
 
         assert values == {"theme": "dark", "page_size": 25, "show_archived": False}
 
@@ -258,7 +264,7 @@ class TestPreferenceGroup:
     ) -> None:
         group = PreferenceGroup(Project, "typed", TypedForm)
 
-        value = group.read({name: stored})[name]
+        value = group.read({name: stored}, DjangoJSONEncoder)[name]
 
         assert value == expected
         assert type(value) is type(expected)
@@ -266,37 +272,49 @@ class TestPreferenceGroup:
     def test_a_stored_value_outside_narrowed_choices_reads_the_default(self) -> None:
         group = PreferenceGroup(Project, "display", NarrowedDisplayForm)
 
-        values = group.read({"theme": "dark"})
+        values = group.read({"theme": "dark"}, DjangoJSONEncoder)
 
         assert values["theme"] == group.defaults()["theme"]
 
     def test_a_stored_value_above_a_lowered_maximum_reads_the_default(self) -> None:
         group = PreferenceGroup(Project, "display", NarrowedDisplayForm)
 
-        values = group.read({"theme": "sepia", "page_size": 80})
+        values = group.read({"theme": "sepia", "page_size": 80}, DjangoJSONEncoder)
 
         assert values == {"theme": "sepia", "page_size": 25}
 
     def test_a_stored_value_of_a_changed_type_reads_the_default(self) -> None:
         group = PreferenceGroup(Project, "display", RetypedForm)
 
-        values = group.read({"page_size": 25})
+        values = group.read({"page_size": 25}, DjangoJSONEncoder)
 
         assert values == {"page_size": datetime.date(2026, 1, 1)}
+
+    @pytest.mark.parametrize(
+        ("name", "stored"), [("label", ["a", "b"]), ("enabled", "dark")]
+    )
+    def test_a_stored_value_its_field_would_convert_reads_the_default(
+        self, name, stored
+    ) -> None:
+        group = PreferenceGroup(Project, "converting", ConvertingForm)
+
+        value = group.read({name: stored}, DjangoJSONEncoder)[name]
+
+        assert value == group.defaults()[name]
 
     def test_a_stored_value_whose_cleaning_raises_something_else_reads_the_default(
         self,
     ) -> None:
         group = PreferenceGroup(Project, "typed", TypedForm)
 
-        values = group.read({"start_date": {"a": 1}})
+        values = group.read({"start_date": {"a": 1}}, DjangoJSONEncoder)
 
         assert values["start_date"] == datetime.date(2026, 1, 1)
 
     def test_a_stored_preference_no_longer_declared_is_ignored(self) -> None:
         group = PreferenceGroup(Project, "display", ProjectDisplayForm)
 
-        values = group.read({"theme": "dark", "retired": 1})
+        values = group.read({"theme": "dark", "retired": 1}, DjangoJSONEncoder)
 
         assert values == {"theme": "dark", "page_size": 25, "show_archived": False}
 
@@ -306,13 +324,13 @@ class TestPreferenceGroup:
     ) -> None:
         group = PreferenceGroup(Project, "display", ProjectDisplayForm)
 
-        assert group.read(stored) == group.defaults()
+        assert group.read(stored, DjangoJSONEncoder) == group.defaults()
 
     def test_a_stored_combination_the_form_now_rejects_still_reads_by_value(
         self,
     ) -> None:
         group = PreferenceGroup(Project, "ordered", OrderedForm)
 
-        values = group.read({"low": 20, "high": 5})
+        values = group.read({"low": 20, "high": 5}, DjangoJSONEncoder)
 
         assert values == {"low": 20, "high": 5}
