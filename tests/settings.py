@@ -25,6 +25,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
 ]
 
+AUTH_USER_MODEL = "testapp.User"
+
 ROOT_URLCONF = "tests.urls"
 
 TEMPLATES = [

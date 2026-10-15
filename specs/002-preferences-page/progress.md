@@ -47,3 +47,10 @@ Did: routed Plain page, PlainFactory, test for ImproperlyConfigured naming testa
 Verified: pytest TestPreferencesViewWithoutPreferences, 1 passed. Passed on first run: the behaviour is registry.get_field, already built.
 Next: T006 test user.
 Watch: none.
+
+## 2026-10-15T12:24:02Z · Implementer US2 · T006
+
+Did: User(AbstractUser) with PreferencesField, AUTH_USER_MODEL, notifications group, UserFactory, user fixture, migration 0002_user.
+Verified: pytest -n auto --dist loadscope 143 passed; makemigrations --check clean; pre-commit all files passed.
+Next: T007 access tests.
+Watch: user fixture unused until T007.

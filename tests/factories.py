@@ -2,7 +2,7 @@
 
 import factory
 
-from tests.testapp.models import Document, Plain, Project
+from tests.testapp.models import Document, Plain, Project, User
 
 
 class ProjectFactory(factory.django.DjangoModelFactory):
@@ -21,6 +21,17 @@ class DocumentFactory(factory.django.DjangoModelFactory):
         model = Document
 
     name = factory.Sequence(lambda n: f"Document {n}")
+
+
+class UserFactory(factory.django.DjangoModelFactory):
+    """Build a person who can sign in with the password ``password``."""
+
+    class Meta:
+        model = User
+
+    username = factory.Sequence(lambda n: f"person{n}")
+    email = factory.Sequence(lambda n: f"person{n}@example.com")
+    password = factory.django.Password("password")
 
 
 class PlainFactory(factory.django.DjangoModelFactory):

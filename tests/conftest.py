@@ -5,14 +5,20 @@ from collections.abc import Iterator
 import pytest
 
 from object_preferences.registry import registry
-from tests.factories import DocumentFactory, ProjectFactory
-from tests.testapp.models import Document, Project
+from tests.factories import DocumentFactory, ProjectFactory, UserFactory
+from tests.testapp.models import Document, Project, User
 
 
 @pytest.fixture
 def project(db) -> Project:
     """Return a saved project."""
     return ProjectFactory()
+
+
+@pytest.fixture
+def user(db) -> User:
+    """Return a saved person, who carries preferences."""
+    return UserFactory()
 
 
 @pytest.fixture
