@@ -138,3 +138,10 @@ Did: seed_example adds a fourth project storing theme sepia, which the display f
 Verified: migrate, seed_example (4 projects) and check ran clean on a fresh sqlite file; the page fetched on port 8731 showed that project reading display.theme: light, page_size 25. Server stopped, db.sqlite3 removed.
 Next: full suite, pre-commit, mypy, report.
 Watch: none.
+
+## 2026-10-15T11:35:00Z · Forge · S5
+
+Did: converged. Squashed the test app migration to one file with a proxy model added for the parent-model edge case (T023), simplified to_stored (T022), graduated D7 and D8 to ADR 0001 and 0002, marked R1 delivered on the roadmap.
+Verified: forge verify green (110 tests), tamper-check clean, check-adrs green, story comments green.
+Next: code review.
+Watch: spawning still unavailable; the review runs in-turn like the stories (D6).
