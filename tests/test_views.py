@@ -5,7 +5,9 @@ import decimal
 
 import pytest
 from django import forms
+from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.models import Permission
 from django.core.exceptions import (
     NON_FIELD_ERRORS,
     ImproperlyConfigured,
@@ -17,7 +19,7 @@ from django.test.html import Element, parse_html
 from django.urls import reverse
 
 from object_preferences.registry import register
-from tests.factories import PlainFactory, ProjectFactory
+from tests.factories import PlainFactory, ProjectFactory, UserFactory
 from tests.testapp.models import Project
 
 
@@ -349,3 +351,123 @@ class TestPreferencesViewMarkup:
             if attribute(node, "id") in described_by
         ]
         assert any(node.children for node in holders)
+
+
+class TestPreferencesViewAccess:
+    def test_an_anonymous_visitor_is_sent_to_sign_in_and_sees_no_form(
+        self, client, project
+    ) -> None:
+        url = reverse("project-preferences-signed-in", args=[project.pk])
+
+        response = client.get(url)
+
+        assert response.status_code == 302
+        assert response.url.startswith(f"{settings.LOGIN_URL}?next=")
+        assert b"<form" not in response.content
+
+    def test_a_signed_in_person_opens_and_saves_a_page_behind_login(
+        self, client, project, user
+    ) -> None:
+        url = reverse("project-preferences-signed-in", args=[project.pk])
+        client.force_login(user)
+
+        opened = client.get(url)
+        saved = client.post(url, submission(**{"display-theme": "dark"}))
+
+        project.refresh_from_db()
+        assert opened.status_code == 200
+        assert saved.status_code == 302
+        assert project.preferences["display"]["theme"] == "dark"
+
+    def test_a_person_without_the_permission_is_refused_on_open_and_on_save(
+        self, client, project, user
+    ) -> None:
+        url = reverse("project-preferences-permitted", args=[project.pk])
+        client.force_login(user)
+
+        opened = client.get(url)
+        saved = client.post(url, submission(**{"display-theme": "dark"}))
+
+        project.refresh_from_db()
+        assert opened.status_code == 403
+        assert saved.status_code == 403
+        assert b"<form" not in opened.content
+        assert project.preferences.stored == {}
+
+    def test_a_person_with_the_permission_opens_and_saves(
+        self, client, project, user
+    ) -> None:
+        url = reverse("project-preferences-permitted", args=[project.pk])
+        user.user_permissions.add(Permission.objects.get(codename="change_project"))
+        client.force_login(user)
+
+        opened = client.get(url)
+        saved = client.post(url, submission(**{"display-theme": "dark"}))
+
+        project.refresh_from_db()
+        assert opened.status_code == 200
+        assert saved.status_code == 302
+        assert project.preferences["display"]["theme"] == "dark"
+
+    def test_a_record_outside_the_limited_queryset_is_not_found(
+        self, client, db
+    ) -> None:
+        inside = ProjectFactory(name="Public plan")
+        outside = ProjectFactory(name="Private plan")
+
+        opened = client.get(reverse("project-preferences-public", args=[inside.pk]))
+        refused = client.get(reverse("project-preferences-public", args=[outside.pk]))
+        refused_save = client.post(
+            reverse("project-preferences-public", args=[outside.pk]), submission()
+        )
+
+        assert opened.status_code == 200
+        assert refused.status_code == 404
+        assert refused_save.status_code == 404
+
+
+class TestPreferencesViewRecordTest:
+    def test_an_anonymous_visitor_is_sent_to_sign_in_and_sees_no_form(
+        self, client, user
+    ) -> None:
+        response = client.get(reverse("user-preferences", args=[user.pk]))
+
+        assert response.status_code == 302
+        assert response.url.startswith(f"{settings.LOGIN_URL}?next=")
+        assert b"<form" not in response.content
+
+    def test_a_person_the_record_test_refuses_gets_403_on_open(
+        self, client, user
+    ) -> None:
+        client.force_login(UserFactory())
+
+        response = client.get(reverse("user-preferences", args=[user.pk]))
+
+        assert response.status_code == 403
+        assert b"<form" not in response.content
+
+    def test_a_person_the_record_test_refuses_changes_nothing_by_posting(
+        self, client, user
+    ) -> None:
+        client.force_login(UserFactory())
+
+        response = client.post(
+            reverse("user-preferences", args=[user.pk]),
+            {"notifications-digest": "weekly"},
+        )
+
+        user.refresh_from_db()
+        assert response.status_code == 403
+        assert user.preferences.stored == {}
+
+    def test_the_record_itself_opens_and_saves_its_page(self, client, user) -> None:
+        url = reverse("user-preferences", args=[user.pk])
+        client.force_login(user)
+
+        opened = client.get(url)
+        saved = client.post(url, {"notifications-digest": "weekly"})
+
+        user.refresh_from_db()
+        assert opened.status_code == 200
+        assert saved.status_code == 302
+        assert user.preferences["notifications"]["digest"] == "weekly"

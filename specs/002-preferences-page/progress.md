@@ -54,3 +54,10 @@ Did: User(AbstractUser) with PreferencesField, AUTH_USER_MODEL, notifications gr
 Verified: pytest -n auto --dist loadscope 143 passed; makemigrations --check clean; pre-commit all files passed.
 Next: T007 access tests.
 Watch: user fixture unused until T007.
+
+## 2026-10-15T12:24:55Z · Implementer US2 · T007
+
+Did: routes for login, permission, record test (OwnPreferencesView) and limited queryset; two test classes.
+Verified: pytest tests/test_views.py 32 passed. Probed: test_func True, login_required removed, permission check removed each fail the matching tests.
+Next: T008 README.
+Watch: tests passed on first run because the behaviour is Django composition, not new code.
