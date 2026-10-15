@@ -189,7 +189,9 @@ project.preferences.save()
 
 `save` writes only the preferences, with `update_fields`, so another field you
 changed on the record and have not saved is left alone. Calling it on a record
-that was never saved raises a `ValueError`. A preference changed to its default
+that has no primary key raises a `ValueError`, and on one whose key is set but
+that has no row (a UUID key is set before the first save) raises a
+`DatabaseError`. A preference changed to its default
 has no stored value afterwards, so `change("display", theme="light")` removes
 `theme` from what the record stores. Asking to change a preference or a group
 that was never declared raises a `KeyError` that names it.

@@ -9,7 +9,7 @@ from django import forms
 from django.apps import apps
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.core.management import call_command
-from django.db import transaction
+from django.db import DatabaseError, transaction
 from django.db.migrations.autodetector import MigrationAutodetector
 from django.db.migrations.graph import MigrationGraph
 from django.db.migrations.state import ProjectState
@@ -17,7 +17,8 @@ from django.utils import timezone
 
 from object_preferences.fields import PreferencesField
 from object_preferences.registry import registry
-from tests.testapp.models import Project, ProjectProxy
+from tests.factories import DocumentFactory
+from tests.testapp.models import Document, Project, ProjectProxy
 
 
 def graph_with_testapp_migrated() -> MigrationGraph:
@@ -570,6 +571,18 @@ class TestRecordPreferences:
             record.preferences.save()
 
         assert Project.objects.count() == 0
+
+    def test_saving_a_record_with_a_default_key_that_was_never_saved_raises(
+        self, db, preference_registry
+    ) -> None:
+        registry.register(Document, "moments", MomentForm)
+        record = DocumentFactory.build()
+        record.preferences.change("moments", moment=datetime.datetime(2026, 1, 1))
+
+        with transaction.atomic(), pytest.raises(DatabaseError):
+            record.preferences.save()
+
+        assert Document.objects.count() == 0
 
     def test_a_stored_group_no_longer_declared_is_ignored(self, project) -> None:
         project.preferences = {"retired": {"theme": "dark"}, "display": {"x": 1}}

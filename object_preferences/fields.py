@@ -148,9 +148,10 @@ class RecordPreferences(Mapping[str, Mapping[str, Any]]):
         """Write the record's preferences to the database, and nothing else.
 
         Raises:
-            ValueError: If the record has never been saved.
+            ValueError: If the record has no primary key.
+            django.db.DatabaseError: If it has one but no row exists.
         """
-        self.record.save(update_fields=[self.field.attname])
+        self.record.save(update_fields=[self.field.attname], force_update=True)
 
     def __iter__(self) -> Iterator[str]:
         """Iterate over the names of the groups declared for the record's model."""
