@@ -65,6 +65,18 @@
         "DR-005 low: English catalogue added to T005 (D5)",
         "forms.JSONField string values: stored through prepare_value() (D2)"
       ]
+    },
+    "review": {
+      "approved_by": "code reviewer (one round) + fix cycle verified by Forge",
+      "at": "2026-10-15T11:47:48Z",
+      "self_resolved": [
+        "COR-001 high: cleaned value through DjangoJSONEncoder; test red when prepare_value storage restored (T024)",
+        "COR-003 medium: ISO parse before clean for temporal fields; test red without it (T025)",
+        "COR-002 medium: save() forces update; test red without force_update (T026)",
+        "COR-004 low: registration errors name both forms, and group and form (T027)",
+        "COR-005 low: apps.py docstring within 88 (T028); a line-length test the fix added was removed as a style test",
+        "COR-006 low: unsaved records via ProjectFactory.build() (T029); tamper flags on tests/test_fields.py, tests/factories.py and the test app migration are this authorised change and additive models only"
+      ]
     }
   },
   "stories": [
