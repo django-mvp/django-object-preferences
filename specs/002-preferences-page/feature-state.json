@@ -63,6 +63,17 @@
         "SPEC-003 low: example project gains accounts and both pages (D13)",
         "SEC-001 low: dispatch wrapped in csrf_protect (D14, plan.md, T002)"
       ]
+    },
+    "review": {
+      "approved_by": "code reviewer (one round, correctness+spec and security lenses) + fixes verified by Forge",
+      "at": "2026-10-15T12:39:47Z",
+      "self_resolved": [
+        "COR-001 low: group error asserted on the rendered fieldset; red without form non-field errors (T011)",
+        "COR-002 low: query count equal for two and five groups; red with a query per group (T012)",
+        "SEC-002 low: record and group names escaped; red with |safe (T013)",
+        "SEC-001 low: README says a record test reveals existence, get_queryset() makes refusals 404 (T014)",
+        "security lens: refused requests read and write nothing, POST reaches only declared fields of the record's groups, only the preferences column is written, CSRF enforced without middleware, no open redirect"
+      ]
     }
   },
   "stories": [
@@ -140,18 +151,51 @@
         },
         {
           "id": "T011",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestPreferencesViewSaving::test_an_error_from_a_forms_clean_is_shown_in_its_groups_fieldset"
+            ],
+            "commands": [
+              "uv run pytest tests/test_views.py -k fieldset (red with the template rendering fields without form errors, green restored)"
+            ],
+            "code": [
+              "tests/test_views.py:240"
+            ]
+          }
         },
         {
           "id": "T012",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestPreferencesView::test_the_page_makes_as_many_queries_however_many_groups_there_are"
+            ],
+            "commands": [
+              "uv run pytest tests/test_views.py -k queries (red with a query added per group, green restored)"
+            ],
+            "code": [
+              "tests/test_views.py:139"
+            ]
+          }
         },
         {
           "id": "T013",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 2,
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestPreferencesView::test_the_record_and_group_names_are_escaped"
+            ],
+            "commands": [
+              "uv run pytest tests/test_views.py -k escaped (red with |safe on the record and group name, green restored)"
+            ],
+            "code": [
+              "tests/test_views.py:155"
+            ]
+          }
         }
       ]
     },
@@ -229,8 +273,19 @@
         },
         {
           "id": "T014",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_views.py"
+            ],
+            "commands": [
+              "uv run pre-commit run --all-files"
+            ],
+            "code": [
+              "README.md:363"
+            ]
+          }
         }
       ]
     },
