@@ -2,7 +2,7 @@
   "feature": "002-preferences-page",
   "branch": "002-preferences-page",
   "repo": "django-mvp/django-object-preferences",
-  "state": "PR_READY",
+  "state": "MERGED",
   "state_history": [
     {
       "state": "QUEUED",
@@ -38,6 +38,11 @@
       "state": "PR_READY",
       "at": "2026-10-15T12:41:42Z",
       "note": "review applied (T011-T014); walkthrough laid out on #10; marking ready for review"
+    },
+    {
+      "state": "MERGED",
+      "at": "2026-10-15T12:44:23Z",
+      "note": "PR #10 merged; approved by forge-aeo-reviewer"
     }
   ],
   "gates": {
@@ -56,8 +61,8 @@
       ]
     },
     "merge": {
-      "approved_by": null,
-      "at": null
+      "approved_by": "forge-aeo-reviewer",
+      "at": "2026-10-15T12:44:18Z"
     },
     "design_review": {
       "approved_by": "design reviewer (one round)",
@@ -81,8 +86,8 @@
       ]
     },
     "walkthrough": {
-      "approved_by": null,
-      "at": "2026-10-15T12:41:44Z",
+      "approved_by": "delegated review",
+      "at": "2026-10-15T12:44:15Z",
       "self_resolved": []
     }
   },
@@ -362,6 +367,6 @@
   },
   "pr": {
     "number": 10,
-    "draft": true
+    "draft": false
   }
 }
