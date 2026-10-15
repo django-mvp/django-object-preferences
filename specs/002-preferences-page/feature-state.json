@@ -214,8 +214,19 @@
       "tasks": [
         {
           "id": "T009",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestPreferencesViewForOwnPreferences"
+            ],
+            "commands": [
+              "uv run pytest tests/test_views.py -k OwnPreferences"
+            ],
+            "code": [
+              "tests/testapp/views.py:1"
+            ]
+          }
         },
         {
           "id": "T010",

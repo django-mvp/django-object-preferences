@@ -82,3 +82,10 @@ Did: added MyPreferencesView to tests/testapp/views.py, routed at preferences/, 
 Verified: uv run pytest tests/test_views.py -k OwnPreferences (3 passed, first seen red on NoReverseMatch); pre-commit and mypy clean.
 Next: T010 example project.
 Watch: README example and test view must stay identical.
+
+## 2026-10-15T12:30:02Z · Implementer US3 · T010
+
+Did: example User (email sign-in, preferences), two person groups, auth settings, sign-in template, permission-gated project page, own page, seeded accounts, migration 0002_user, README Example project.
+Verified: fresh db migrate, seed_example, check clean; drove pages with django.test.Client as anonymous, regular, regular2, staff, super (403/302/200 as intended, own pages show own values); makemigrations --check clean; pre-commit and mypy clean.
+Next: none for this story.
+Watch: example MyPreferencesView matches README and tests copy.

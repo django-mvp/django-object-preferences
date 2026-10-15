@@ -429,8 +429,10 @@ person can only ever reach their own record, because no other is looked up.
 
 ## Example project
 
-The repository holds a small Django project in `example/` that declares a
-group, reads it and changes it from code. From a checkout:
+The repository holds a small Django project in `example/`. It declares groups
+for a project and for a person, reads them, changes them from code, and routes
+both kinds of preferences page: a project's page behind a permission, and each
+person's own page. From a checkout:
 
 ```bash
 uv run python manage.py migrate
@@ -441,7 +443,20 @@ uv run python manage.py runserver
 Open the address it prints to see four projects, the preferences each one
 reads and the dictionary each one stores, which holds only what was changed.
 The last project stored a theme that the form no longer offers, so it reads the
-default theme while the stored column still shows the old value.
+default theme while the stored column still shows the old value. Each project
+links to its preferences page, and "Your preferences" opens the page for the
+person signed in.
+
+`seed_example` also creates four accounts, each with the password `password`:
+
+| Email | Who they are |
+| --- | --- |
+| `regular.user@example.com` | A person with no permissions. A project's page refuses them. |
+| `regular.user2@example.com` | The same, with a stored notification choice of their own. |
+| `staff.user@example.com` | May change projects, so may use a project's page. |
+| `super.user@example.com` | A superuser. |
+
+Running it again deletes and recreates the projects and the accounts.
 
 ## Contributing
 
