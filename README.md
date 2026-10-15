@@ -3,11 +3,13 @@
 [![Tests](https://github.com/django-mvp/django-object-preferences/actions/workflows/tests.yml/badge.svg)](https://github.com/django-mvp/django-object-preferences/actions/workflows/tests.yml)
 [![Build](https://github.com/django-mvp/django-object-preferences/actions/workflows/build.yml/badge.svg)](https://github.com/django-mvp/django-object-preferences/actions/workflows/build.yml)
 [![Publish](https://github.com/django-mvp/django-object-preferences/actions/workflows/publish.yml/badge.svg)](https://github.com/django-mvp/django-object-preferences/actions/workflows/publish.yml)
-[![codecov](https://codecov.io/gh/django-mvp/django-object-preferences/branch/main/graph/badge.svg)](https://codecov.io/gh/django-mvp/django-object-preferences)
+[![Coverage](https://codecov.io/gh/django-mvp/django-object-preferences/branch/main/graph/badge.svg)](https://codecov.io/gh/django-mvp/django-object-preferences)
 [![PyPI](https://img.shields.io/pypi/v/django-object-preferences)](https://pypi.org/project/django-object-preferences/)
+[![Development status](https://img.shields.io/pypi/status/django-object-preferences)](https://pypi.org/project/django-object-preferences/)
 [![Python](https://img.shields.io/pypi/pyversions/django-object-preferences)](https://pypi.org/project/django-object-preferences/)
 [![Django](https://img.shields.io/pypi/djversions/django-object-preferences)](https://pypi.org/project/django-object-preferences/)
-[![License](https://img.shields.io/github/license/django-mvp/django-object-preferences)](https://github.com/django-mvp/django-object-preferences/blob/main/LICENSE)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Licence](https://img.shields.io/github/license/django-mvp/django-object-preferences)](https://github.com/django-mvp/django-object-preferences/blob/main/LICENSE)
 
 Preferences stored on any Django model instance, declared with forms.
 
@@ -46,6 +48,11 @@ When two designs conflict, the one an experienced Django developer would
 recognise wins over the cleverer one. Forms, model fields and class-based views
 are used the way Django intends, and nothing is added that a project could do
 just as well with what Django already provides.
+
+## Requirements
+
+- Python 3.12 or later.
+- Django 5.2, 6.0 or 6.1.
 
 ## Installation
 
@@ -279,6 +286,10 @@ uv sync
 uv run pytest
 uv run pre-commit install
 ```
+
+## Changelog
+
+See [CHANGELOG.md](https://github.com/django-mvp/django-object-preferences/blob/main/CHANGELOG.md).
 
 ## License
 
