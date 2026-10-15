@@ -68,3 +68,10 @@ Did: added a makemigrations --check --dry-run test after registering and replaci
 Verified: uv run pytest tests/test_apps.py -q, 2 passed. It passed on first run: it guards a property that holds by design (groups touch no model), so there was no red step.
 Next: T010 README and changelog.
 Watch: none.
+
+## 2026-10-15T11:19:59Z · Implementer US2 · T010
+
+Did: README sections on declaring, looking up and reading groups, where a default comes from, and the required-field-with-no-initial case; CHANGELOG entries.
+Verified: uv run pre-commit run --all-files passed. No other page under docs/ documents a name or behaviour this story touched.
+Next: full suite, pre-commit, mypy, report.
+Watch: none.

@@ -168,7 +168,7 @@
               "uv run pytest tests/test_registry.py -x"
             ],
             "code": [
-              "object_preferences/registry.py:56"
+              "object_preferences/registry.py:120"
             ]
           }
         },
@@ -216,14 +216,22 @@
               "uv run pytest tests/test_apps.py -q"
             ],
             "code": [
-              "tests/test_apps.py:16"
+              "tests/test_apps.py:17"
             ]
           }
         },
         {
           "id": "T010",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv run pre-commit run --all-files"
+            ],
+            "code": [
+              "README.md:73"
+            ]
+          }
         }
       ]
     },

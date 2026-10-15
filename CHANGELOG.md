@@ -30,3 +30,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   an empty dictionary until a preference is changed. Reading the attribute
   returns a `RecordPreferences` for that record.
 - The English message catalogue.
+- Preference groups: a group is a Django form registered for a model with
+  `register` or `registry.register()`, in a `preferences.py` module that the
+  package finds in every installed app at startup. `registry.get_groups()`,
+  `registry.get_group()` and `registry.get_field()` look groups and the model's
+  field up. Startup stops with a clear error for a duplicate name, a model
+  without `PreferencesField`, or a form with a model choice, file or
+  multi-value field.
+- Reading preferences: `record.preferences["group"]["name"]` returns the
+  stored value as the field's type, or the field's default, with no database
+  query.

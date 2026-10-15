@@ -98,6 +98,84 @@ project.preferences.stored  # {}
 
 The field is not editable, so a `ModelForm` for the model leaves it out.
 
+### Declaring a group of preferences
+
+A group of preferences is an ordinary Django form, and each of its fields is
+one preference. Register it for the model the way you would register a model
+admin, in a module called `preferences.py` inside any installed app. The
+package imports that module for every installed app when Django starts, so the
+project's settings never list it:
+
+```python
+# projects/preferences.py
+from django import forms
+
+from object_preferences.registry import register
+
+from .models import Project
+
+
+@register(Project, name="display")
+class DisplayPreferences(forms.Form):
+    theme = forms.ChoiceField(
+        choices=[("light", "Light"), ("dark", "Dark")], initial="light"
+    )
+    page_size = forms.IntegerField(initial=25, min_value=5, max_value=100)
+    show_archived = forms.BooleanField(required=False)
+```
+
+`register` is the decorator form of `registry.register(model, name, form_class)`,
+where `registry` is the project-wide `PreferenceRegistry`. A group's name is
+unique for its model. Registering returns a `PreferenceGroup`, which knows its
+`model`, its `name` and its `form_class`.
+
+Startup stops with an `ImproperlyConfigured` error that names the problem when
+two groups for one model share a name, when the model has no `PreferencesField`,
+or when the form has a field that refers to other records or carries an upload
+(`ModelChoiceField`, `FileField` and `MultiValueField`, with their subclasses).
+
+To look groups up, ask the registry:
+
+```python
+from object_preferences.registry import registry
+
+registry.get_groups(Project)           # every PreferenceGroup, in registration order
+registry.get_group(Project, "display")  # one group, or a KeyError naming it
+registry.get_field(Project)             # the model's PreferencesField
+```
+
+Groups belong to exactly the model they were registered for. A subclass or a
+proxy of that model does not inherit them.
+
+### Reading preferences
+
+`project.preferences` maps each group's name to a read-only mapping of that
+group's values:
+
+```python
+project.preferences["display"]["theme"]      # "light"
+project.preferences["display"]["page_size"]  # 25
+list(project.preferences)                    # ["display"]
+```
+
+Reading never queries the database, however many preferences it reads, because
+the values travel with the record. Asking for a group or a preference that was
+never declared raises a `KeyError` that names it.
+
+A preference nobody has changed reads its default, and the default comes from
+the field. It is the field's `initial` value. A field with no `initial` reads
+the value an empty submission of the form would give it, so a `BooleanField`
+reads `False`, an optional `DurationField` reads `None` and an optional
+`MultipleChoiceField` reads an empty list. A required field with no `initial`
+reads as empty: an empty string, or `None` for a number or a date. Reading never
+raises for want of a default.
+
+A changed value reads back as the type its field produces, so a `DateField`
+gives a `datetime.date` and a `DecimalField` a `decimal.Decimal`, although the
+record stores them as JSON. Change a field's `initial` and every record that has
+not stored its own value reads the new default, with no migration and no data
+change.
+
 ## Contributing
 
 Standards for this repository live in
