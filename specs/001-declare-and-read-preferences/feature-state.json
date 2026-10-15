@@ -339,8 +339,16 @@
         },
         {
           "id": "T016",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv run python manage.py shell (README change/save/ValidationError snippets run against the example project)"
+            ],
+            "code": [
+              "README.md:118"
+            ]
+          }
         }
       ]
     },

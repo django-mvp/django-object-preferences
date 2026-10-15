@@ -40,3 +40,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reading preferences: `record.preferences["group"]["name"]` returns the
   stored value as the field's type, or the field's default, with no database
   query.
+- Changing preferences from code: `record.preferences.change("group", name=value)`
+  validates the values with the group's form and keeps the group's other
+  preferences, and `record.preferences.save()` writes only the preferences.
+  `get_form()` and `apply()` do the same for a whole submitted form. A value
+  changed back to its default is no longer stored, and a value the form
+  rejects raises a `ValidationError` and leaves the record as it was.
+- An example project in `example/`, with a command that seeds it, showing a
+  group declared, read and changed.

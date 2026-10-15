@@ -110,3 +110,10 @@ Did: example project (manage.py, example/ app, seed_example, migration), ignores
 Verified: migrate OK, seed_example run twice gave 3 projects each time, check exit 0, curl of / on port 8317 returned 200 and listed the three projects with their stored dictionaries. Server stopped.
 Next: T016 README and CHANGELOG.
 Watch: none.
+
+## 2026-10-15T11:26:30Z · Implementer US3 · T016
+
+Did: README section on changing from code (change, save, get_form, apply, ValidationError) and an Example project section; CHANGELOG entries.
+Verified: ran the README change/save/ValidationError snippets in the example project shell; outputs matched the text; pre-commit clean. No other page under docs/ describes this API.
+Next: full suite.
+Watch: none.

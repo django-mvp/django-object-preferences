@@ -176,6 +176,72 @@ record stores them as JSON. Change a field's `initial` and every record that has
 not stored its own value reads the new default, with no migration and no data
 change.
 
+### Changing preferences from code
+
+`change` sets some of a group's preferences and leaves the rest as they were.
+It validates the values with the group's form, and it changes the record in
+memory only, so `save` writes it:
+
+```python
+project.preferences.change("display", theme="dark", page_size=50)
+project.preferences.save()
+```
+
+`save` writes only the preferences, with `update_fields`, so another field you
+changed on the record and have not saved is left alone. Calling it on a record
+that was never saved raises a `ValueError`. A preference changed to its default
+has no stored value afterwards, so `change("display", theme="light")` removes
+`theme` from what the record stores. Asking to change a preference or a group
+that was never declared raises a `KeyError` that names it.
+
+A value the form rejects raises Django's `ValidationError`, and the record is
+left as it was. Its `error_dict` is keyed by field name, and an error from the
+form's own `clean()` is under `NON_FIELD_ERRORS`. Each error carries the code
+the form gave it, which is what to test for rather than the message:
+
+```python
+from django.core.exceptions import ValidationError
+
+try:
+    project.preferences.change("display", page_size=3)
+except ValidationError as error:
+    error.error_dict["page_size"][0].code  # "min_value"
+```
+
+To work with a whole submission, use the group's form itself. `get_form`
+returns the group's form starting from the record's current values, bound to
+`data` when you pass it, and `apply` validates a bound form and stores its
+values on the record. Both work on their own, so a page can bind the form of
+every group, check them all, then `apply` each and `save` once:
+
+```python
+form = project.preferences.get_form("display", data=request.POST, prefix="display")
+if form.is_valid():
+    project.preferences.apply("display", form)
+    project.preferences.save()
+```
+
+`apply` raises a `TypeError` for a form that is not the group's own, and the
+same `ValidationError` as `change` for an invalid one. Applying a group
+replaces that group's stored values and leaves every other group alone, and it
+drops stored keys that the group no longer declares. A `JSONField` preference is
+stored as the JSON text its form field shows, and reads back as the value you
+set.
+
+## Example project
+
+The repository holds a small Django project in `example/` that declares a
+group, reads it and changes it from code. From a checkout:
+
+```bash
+uv run python manage.py migrate
+uv run python manage.py seed_example
+uv run python manage.py runserver
+```
+
+Open the address it prints to see three projects, the preferences each one
+reads and the dictionary each one stores, which holds only what was changed.
+
 ## Contributing
 
 Standards for this repository live in
