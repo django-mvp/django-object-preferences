@@ -33,3 +33,10 @@ Did: generated tests/testapp/migrations/0001_initial.py with makemigrations; add
 Verified: uv run pytest tests/test_fields.py -q, 15 passed; pre-commit clean.
 Next: T005 README, CHANGELOG, catalogue.
 Watch: none.
+
+## 2026-10-15T11:14:57Z · Implementer US1 · T005
+
+Did: README Usage section (turning preferences on, quoting PreferencesField, PreferencesDescriptor, RecordPreferences), CHANGELOG Added entries, locale/en/LC_MESSAGES/django.po via makemessages -l en (locale/ had to be created first). Built a wheel to /tmp and confirmed the .po ships.
+Verified: pre-commit all files clean; uv build --wheel lists object_preferences/locale/en/LC_MESSAGES/django.po.
+Next: full suite and report.
+Watch: no docs/ page describes anything this story touched.

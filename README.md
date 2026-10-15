@@ -62,6 +62,42 @@ INSTALLED_APPS = [
 ]
 ```
 
+## Usage
+
+### Turning preferences on for a model
+
+Add a `PreferencesField` to the model whose records should carry preferences,
+then make and run the migration:
+
+```python
+from django.db import models
+
+from object_preferences.fields import PreferencesField
+
+
+class Project(models.Model):
+    name = models.CharField(max_length=100)
+    preferences = PreferencesField()
+```
+
+The field takes no arguments. It is one JSON column, and a model needs only
+one. Its migration reads `PreferencesField()`, and it is the only migration
+this package ever asks of your project: declaring preferences later adds no
+table and no migration.
+
+Reading `project.preferences` returns a `RecordPreferences`, which belongs to
+that one record and is installed by the field's `PreferencesDescriptor`. It
+knows its `record` and its `field`, and its `stored` property is the
+dictionary the record keeps. A new record stores an empty dictionary, because
+a record holds only the values someone has changed from their defaults:
+
+```python
+project = Project(name="Atlas")
+project.preferences.stored  # {}
+```
+
+The field is not editable, so a `ModelForm` for the model leaves it out.
+
 ## Contributing
 
 Standards for this repository live in

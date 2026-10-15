@@ -132,8 +132,19 @@
         },
         {
           "id": "T005",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 2,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py"
+            ],
+            "commands": [
+              "uv run pre-commit run --all-files"
+            ],
+            "code": [
+              "README.md:63"
+            ]
+          }
         }
       ]
     },

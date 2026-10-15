@@ -25,3 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - The package, generated and not yet doing anything.
+- `PreferencesField`, the model field that turns preferences on for a model. A
+  model carries it by adding the field and one migration, and a record stores
+  an empty dictionary until a preference is changed. Reading the attribute
+  returns a `RecordPreferences` for that record.
+- The English message catalogue.
