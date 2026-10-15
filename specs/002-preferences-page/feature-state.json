@@ -2,7 +2,7 @@
   "feature": "002-preferences-page",
   "branch": "002-preferences-page",
   "repo": "django-mvp/django-object-preferences",
-  "state": "PLAN",
+  "state": "DESIGN_REVIEW",
   "state_history": [
     {
       "state": "QUEUED",
@@ -13,6 +13,11 @@
       "state": "PLAN",
       "at": "2026-10-15T12:08:33Z",
       "note": "picked up from the queue on 002-preferences-page, rebased onto origin/main f1acb4b; spec read against FS-001 with no contradiction"
+    },
+    {
+      "state": "DESIGN_REVIEW",
+      "at": "2026-10-15T12:09:06Z",
+      "note": "plan, research and tasks committed at 379246b; base a339715 verified green"
     }
   ],
   "gates": {
@@ -24,12 +29,25 @@
       ]
     },
     "plan": {
-      "approved_by": null,
-      "at": null
+      "approved_by": "open",
+      "at": "2026-10-15T12:16:09Z",
+      "self_resolved": [
+        "plan gate open by default; plan comment posted on #10"
+      ]
     },
     "merge": {
       "approved_by": null,
       "at": null
+    },
+    "design_review": {
+      "approved_by": "design reviewer (one round)",
+      "at": "2026-10-15T12:14:00Z",
+      "self_resolved": [
+        "SPEC-001 medium: extra test groups registered inside the tests with preference_registry (tasks.md T002)",
+        "SPEC-002 low: a group's legend is its name, outside FR-017 (D12)",
+        "SPEC-003 low: example project gains accounts and both pages (D13)",
+        "SEC-001 low: dispatch wrapped in csrf_protect (D14, plan.md, T002)"
+      ]
     }
   },
   "stories": [
@@ -128,7 +146,7 @@
       "max": 120
     },
     "design_review_cycles": {
-      "used": 0,
+      "used": 1,
       "max": 1
     }
   },

@@ -22,7 +22,8 @@ story. The example project gains accounts and two routed pages.
 - **II/III Simplicity, anti-abstraction**: one view, one template, no base class or mixin of our
   own, no new setting.
 - **V Security**: the template escapes everything through the template layer; the form posts with
-  `{% csrf_token %}`; no access decision is made by the package (Article XII).
+  `{% csrf_token %}` and the view is `csrf_protect`ed; no access decision is made by the package
+  (Article XII).
 - **VI Documentation**: README and CHANGELOG in each story that adds public surface.
 - **VIII Internationalisation**: template strings and the success message translatable; catalogue
   regenerated.
@@ -91,8 +92,12 @@ The shape is the contract; names and docstrings follow the code-documentation st
   preferences (FR-010). A model with no groups saves an unchanged dictionary, which changes
   nothing.
 - `get_success_url()` returns `request.path`, so the redirect lands on the same page (FR-008).
-- No method touches the request before `get()` or `post()`, so every Django access mixin or
-  decorator refuses before the record is read (FR-011, FR-012).
+- No method does any work before `get()` or `post()`, so every Django access mixin or decorator
+  refuses before the page reads a value or saves anything (FR-011, FR-012). A rule that tests the
+  person against the record reads the record itself, in its own `test_func()`.
+- `dispatch()` is wrapped in `csrf_protect` with `method_decorator`, as Django's own sign-in and
+  password views are, so the page refuses a forged POST in a project without the CSRF middleware
+  (D14).
 - `context_object_name = "record"`. `DetailView` would otherwise name the record after its model,
   and for a user record that is `user`, which shadows the signed-in person from the
   authentication context processor. `record` is the glossary's word.

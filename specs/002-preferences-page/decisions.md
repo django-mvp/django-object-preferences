@@ -114,3 +114,35 @@ the page and sets who may use it (Story 2). Pointing the page at the signed-in p
 story (Story 3) because the issue asks for it by name and it is a distinct thing a developer does,
 though it uses Story 2's page. It is P2 because it adds no capability that Stories 1 and 2 do not
 already provide.
+
+## D12. A group's legend is its name, not translated text
+
+**Chosen:** each group on the page is headed by the group's registered name with a capital first
+letter.
+
+**Why:** FS-001 gives a group a name and no human label, and adding one would be public API that
+nothing in this specification asks for. The name is the host project's own text, chosen in its
+own code, so FR-017 (text the page itself shows) does not reach it. A project that wants
+different words overrides the template. Raised by the design review (SPEC-002, low).
+
+## D13. The example project gains accounts and both kinds of page
+
+**Chosen:** the example project gets a user model that carries preferences, sign-in, the
+standard development accounts, a page for each project behind a permission, and a page for the
+signed-in person's own preferences.
+
+**Why:** no requirement asks for it, but every acceptance scenario in Story 2 and Story 3 is about
+who is signed in, and the merge review of a page is done by opening it. The example is also where
+SC-006 ("the documentation's example works as written") can be seen running in a real project,
+not only in the test suite. It ships nothing in the package. Raised by the design review
+(SPEC-003, low).
+
+## D14. The page protects itself against forged submissions
+
+**Chosen:** `PreferencesView.dispatch()` is wrapped in `csrf_protect`.
+
+**Why:** the page writes to a record, and the CSRF middleware is a setting a project can remove.
+Django's own sign-in and password views protect themselves the same way
+(`django/contrib/auth/views.py`), while its generic editing views rely on the middleware. One
+decorator removes the dependency on a setting the package cannot see, and it does nothing extra
+when the middleware is present. Raised by the design review (SEC-001, low).

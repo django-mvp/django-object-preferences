@@ -37,12 +37,18 @@ changed values and read the record back.
   nothing, re-renders with the error on that field by code and both entered values in place
   (US1-5, FR-004, FR-005, FR-006); a group-level error from a form's `clean()` is shown for the
   group (FR-006); saving an unchanged page leaves nothing stored (US1-6); two groups declaring a
-  preference of the same name keep their own values (US1-7, FR-007, needs a second group on
-  `Project` in `tests/testapp/preferences.py` declaring a field of a name another group uses); a
+  preference of the same name keep their own values (US1-7, FR-007); a
   success message is added (US1-8, FR-009) and saving works with the messages middleware removed
   (FR-009); `success_url` set on the view is where the person is sent (FR-008); the save writes
   the preferences field only (US1-9, FR-010, by `update_fields` seen in a `post_save` receiver);
-  saving a `Document` page changes nothing (edge case).
+  saving a `Document` page changes nothing (edge case); a POST without a CSRF token is refused
+  with 403 even when the project has no CSRF middleware (D14, `Client(enforce_csrf_checks=True)`
+  with the middleware removed by the `settings` fixture). The extra groups US1-7 and the
+  group-level error need (a group with a preference named like one in `display`, a group whose
+  form's `clean()` raises with a code) are registered inside those tests with the
+  `preference_registry` fixture, as `tests/test_fields.py` already does, never in
+  `tests/testapp/preferences.py`: three existing tests pin `Project`'s groups (design review
+  SPEC-001).
 - [ ] T003 [US1] Accessible markup (FR-015). Tests: every control has a `<label>` whose `for` is
   the control's id; each group is a `<fieldset>` with a `<legend>`; after an invalid save the
   invalid control's `aria-describedby` names an element that holds its error. Find elements by id
@@ -66,7 +72,8 @@ submit it as the owner, another person and an anonymous visitor.
 - [ ] T006 [US2] A test user model: `User(AbstractUser)` with a `PreferencesField` in
   `tests/testapp/models.py`, `AUTH_USER_MODEL = "testapp.User"`, a group registered for it in
   `tests/testapp/preferences.py`, `UserFactory` in `tests/factories.py`, a `user` fixture in
-  `tests/conftest.py`, and the test app migration for it.
+  `tests/conftest.py`, and the test app migration for it. The inherited `AbstractUser` fields
+  carry no `help_text`; the model is not packaged, so no field-metadata test covers it.
 - [ ] T007 [US2] Access rules, in `tests/urls.py` and `tests/testapp/views.py`: `login_required`
   around the `Project` page; `permission_required("testapp.change_project", raise_exception=True)`
   around it; a `UserPassesTestMixin` subclass for `User` records admitting only the record itself;
