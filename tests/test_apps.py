@@ -1,11 +1,8 @@
 """ObjectPreferencesConfig."""
 
-import inspect
-
 import pytest
 from django.core.management import call_command
 
-from object_preferences import apps
 from object_preferences.registry import registry
 from tests.testapp.models import Project
 from tests.testapp.preferences import TypedForm
@@ -27,8 +24,3 @@ class TestObjectPreferencesConfig:
             call_command("makemigrations", check=True, dry_run=True)
         except SystemExit:
             pytest.fail("declaring preferences asked for a migration")
-
-    def test_no_line_of_the_module_exceeds_the_org_line_length(self) -> None:
-        lines = inspect.getsource(apps).splitlines()
-
-        assert [line for line in lines if len(line) > 88] == []

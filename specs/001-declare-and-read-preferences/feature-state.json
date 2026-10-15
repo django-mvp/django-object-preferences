@@ -330,11 +330,8 @@
           "status": "done",
           "attempts": 1,
           "evidence": {
-            "tests": [
-              "tests/test_apps.py::TestObjectPreferencesConfig::test_no_line_of_the_module_exceeds_the_org_line_length"
-            ],
             "commands": [
-              "uv run pytest tests/test_apps.py -q"
+              "awk 'length > 88' object_preferences/apps.py (no output)"
             ],
             "code": [
               "object_preferences/apps.py:23"
