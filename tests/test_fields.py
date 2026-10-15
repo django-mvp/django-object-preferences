@@ -17,7 +17,7 @@ from django.utils import timezone
 
 from object_preferences.fields import PreferencesField
 from object_preferences.registry import registry
-from tests.factories import DocumentFactory
+from tests.factories import DocumentFactory, ProjectFactory
 from tests.testapp.models import Document, Project, ProjectProxy
 
 
@@ -126,7 +126,7 @@ class NarrowedDisplayForm(forms.Form):
 
 class TestRecordPreferences:
     def test_a_new_record_stores_nothing(self) -> None:
-        record = Project(name="New")
+        record = ProjectFactory.build()
 
         assert record.preferences.stored == {}
 
@@ -153,7 +153,7 @@ class TestRecordPreferences:
     def test_assigning_the_accessor_of_another_record_copies_its_stored_dictionary(
         self, project
     ) -> None:
-        other = Project(name="Other")
+        other = ProjectFactory.build()
         other.preferences = {"display": {"theme": "dark"}}
 
         project.preferences = other.preferences
@@ -163,7 +163,7 @@ class TestRecordPreferences:
     def test_saving_a_record_assigned_an_accessor_stores_the_dictionary(
         self, project
     ) -> None:
-        other = Project(name="Other")
+        other = ProjectFactory.build()
         other.preferences = {"display": {"theme": "dark"}}
         project.preferences = other.preferences
         project.save()
@@ -564,7 +564,7 @@ class TestRecordPreferences:
     def test_saving_a_record_that_was_never_saved_raises_and_writes_nothing(
         self, db
     ) -> None:
-        record = Project(name="New")
+        record = ProjectFactory.build()
         record.preferences.change("display", theme="dark")
 
         with transaction.atomic(), pytest.raises(ValueError):
