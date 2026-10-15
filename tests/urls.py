@@ -3,9 +3,14 @@
 from django.urls import path
 
 from object_preferences.views import PreferencesView
-from tests.testapp.models import Document, Project
+from tests.testapp.models import Document, Plain, Project
 
 urlpatterns = [
+    path(
+        "plain/<int:pk>/preferences/",
+        PreferencesView.as_view(model=Plain),
+        name="plain-preferences",
+    ),
     path(
         "projects/<int:pk>/preferences/",
         PreferencesView.as_view(model=Project),

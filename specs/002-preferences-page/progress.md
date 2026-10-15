@@ -40,3 +40,10 @@ Did: accepted US1 (T001-T004). Implementer ran as an in-turn harness agent (sonn
 Verified: receipts green; forge verify green on the merged branch (142 tests); tamper-check flags tests/conftest.py and tests/urls.py, both additive (a document fixture, routes).
 Next: US2.
 Watch: US2 adds AUTH_USER_MODEL=testapp.User; FS-001 tests must stay untouched.
+
+## 2026-10-15T12:23:12Z · Implementer US2 · T005
+
+Did: routed Plain page, PlainFactory, test for ImproperlyConfigured naming testapp.Plain.
+Verified: pytest TestPreferencesViewWithoutPreferences, 1 passed. Passed on first run: the behaviour is registry.get_field, already built.
+Next: T006 test user.
+Watch: none.

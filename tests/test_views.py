@@ -3,16 +3,21 @@
 import datetime
 import decimal
 
+import pytest
 from django import forms
 from django.contrib import messages
-from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
+from django.core.exceptions import (
+    NON_FIELD_ERRORS,
+    ImproperlyConfigured,
+    ValidationError,
+)
 from django.db.models.signals import post_save
 from django.test import Client
 from django.test.html import Element, parse_html
 from django.urls import reverse
 
 from object_preferences.registry import register
-from tests.factories import ProjectFactory
+from tests.factories import PlainFactory, ProjectFactory
 from tests.testapp.models import Project
 
 
@@ -131,6 +136,16 @@ class TestPreferencesView:
         response = client.get(reverse("project-preferences", args=[999]))
 
         assert response.status_code == 404
+
+
+class TestPreferencesViewWithoutPreferences:
+    def test_a_model_with_no_preferences_fails_naming_the_model(
+        self, client, db
+    ) -> None:
+        plain = PlainFactory()
+
+        with pytest.raises(ImproperlyConfigured, match=r"testapp\.Plain"):
+            client.get(reverse("plain-preferences", args=[plain.pk]))
 
 
 class TestPreferencesViewSaving:

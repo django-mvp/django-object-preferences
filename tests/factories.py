@@ -2,7 +2,7 @@
 
 import factory
 
-from tests.testapp.models import Document, Project
+from tests.testapp.models import Document, Plain, Project
 
 
 class ProjectFactory(factory.django.DjangoModelFactory):
@@ -21,3 +21,12 @@ class DocumentFactory(factory.django.DjangoModelFactory):
         model = Document
 
     name = factory.Sequence(lambda n: f"Document {n}")
+
+
+class PlainFactory(factory.django.DjangoModelFactory):
+    """Build a record that carries no preferences."""
+
+    class Meta:
+        model = Plain
+
+    name = factory.Sequence(lambda n: f"Plain {n}")
