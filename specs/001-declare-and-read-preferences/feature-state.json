@@ -2,7 +2,7 @@
   "feature": "001-declare-and-read-preferences",
   "branch": "001-declare-and-read-preferences",
   "repo": "django-mvp/django-object-preferences",
-  "state": "CONVERGE",
+  "state": "REVIEW",
   "state_history": [
     {
       "state": "QUEUED",
@@ -28,6 +28,11 @@
       "state": "CONVERGE",
       "at": "2026-10-15T11:32:52Z",
       "note": "all four stories done"
+    },
+    {
+      "state": "REVIEW",
+      "at": "2026-10-15T11:35:16Z",
+      "note": "converged: ADRs 0001-0002, roadmap R1 delivered, story comments green"
     }
   ],
   "gates": {
@@ -150,6 +155,11 @@
               "README.md:63"
             ]
           }
+        },
+        {
+          "id": "T029",
+          "status": "todo",
+          "attempts": 0
         }
       ]
     },
@@ -271,6 +281,21 @@
               "tests/testapp/models.py:28"
             ]
           }
+        },
+        {
+          "id": "T025",
+          "status": "todo",
+          "attempts": 0
+        },
+        {
+          "id": "T027",
+          "status": "todo",
+          "attempts": 0
+        },
+        {
+          "id": "T028",
+          "status": "todo",
+          "attempts": 0
         }
       ]
     },
@@ -387,6 +412,16 @@
               "object_preferences/fields.py:1"
             ]
           }
+        },
+        {
+          "id": "T024",
+          "status": "todo",
+          "attempts": 0
+        },
+        {
+          "id": "T026",
+          "status": "todo",
+          "attempts": 0
         }
       ]
     },
@@ -470,7 +505,7 @@
       "max": 2
     },
     "review_cycles": {
-      "used": 0,
+      "used": 1,
       "max": 1
     },
     "tokens": {
