@@ -206,8 +206,19 @@
         },
         {
           "id": "T009",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_apps.py::TestObjectPreferencesConfig::test_registering_and_replacing_a_group_leaves_no_migration_to_make"
+            ],
+            "commands": [
+              "uv run pytest tests/test_apps.py -q"
+            ],
+            "code": [
+              "tests/test_apps.py:16"
+            ]
+          }
         },
         {
           "id": "T010",

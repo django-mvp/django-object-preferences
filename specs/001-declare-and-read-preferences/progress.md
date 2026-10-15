@@ -61,3 +61,10 @@ Did: PreferenceGroup.defaults/read and RecordPreferences as a Mapping of group n
 Verified: uv run pytest tests/test_registry.py tests/test_fields.py -q, 55 passed; pre-commit and mypy clean.
 Next: T009 makemigrations check.
 Watch: read() assumes well-formed stored data until US4.
+
+## 2026-10-15T11:19:37Z · Implementer US2 · T009
+
+Did: added a makemigrations --check --dry-run test after registering and replacing a group.
+Verified: uv run pytest tests/test_apps.py -q, 2 passed. It passed on first run: it guards a property that holds by design (groups touch no model), so there was no red step.
+Next: T010 README and changelog.
+Watch: none.
