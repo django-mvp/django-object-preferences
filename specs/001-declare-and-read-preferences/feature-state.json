@@ -68,8 +68,19 @@
       "tasks": [
         {
           "id": "T001",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_smoke.py::TestPackagedApp::test_app_is_installed"
+            ],
+            "commands": [
+              "uv run pytest -q"
+            ],
+            "code": [
+              "tests/testapp/models.py:8"
+            ]
+          }
         },
         {
           "id": "T002",
