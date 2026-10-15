@@ -174,8 +174,19 @@
         },
         {
           "id": "T007",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_apps.py::TestObjectPreferencesConfig"
+            ],
+            "commands": [
+              "uv run pytest tests/test_apps.py tests/test_registry.py -x"
+            ],
+            "code": [
+              "object_preferences/apps.py:22"
+            ]
+          }
         },
         {
           "id": "T008",

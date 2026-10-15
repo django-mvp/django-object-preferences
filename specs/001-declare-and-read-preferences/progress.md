@@ -47,3 +47,10 @@ Did: added registry.py (PreferenceGroup, PreferenceRegistry, registry, register)
 Verified: uv run pytest tests/test_registry.py -x, 17 passed; pre-commit all files passed.
 Next: T007 discovery.
 Watch: git status after ledger/progress writes.
+
+## 2026-10-15T11:18:21Z · Implementer US2 · T007
+
+Did: ready() calls autodiscover_modules("preferences"); tests/testapp/preferences.py registers display and typed groups.
+Verified: uv run pytest tests/test_apps.py tests/test_registry.py -x, 18 passed; red first (no groups found).
+Next: T008 reading.
+Watch: none.
