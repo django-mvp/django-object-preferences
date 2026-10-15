@@ -97,6 +97,29 @@ class TestPreferenceRegistry:
         with pytest.raises(ImproperlyConfigured):
             registry.register(Project, "display", DisplayForm)
 
+    def test_a_duplicate_name_error_names_the_model_the_name_and_both_forms(
+        self,
+    ) -> None:
+        registry = PreferenceRegistry()
+        registry.register(Project, "display", DisplayForm)
+
+        with pytest.raises(ImproperlyConfigured) as excinfo:
+            registry.register(Project, "display", ImageForm)
+
+        message = str(excinfo.value)
+        for expected in ("testapp.Project", "display", "DisplayForm", "ImageForm"):
+            assert expected in message
+
+    def test_a_model_without_the_field_error_names_the_model_group_and_form(
+        self,
+    ) -> None:
+        with pytest.raises(ImproperlyConfigured) as excinfo:
+            PreferenceRegistry().register(Plain, "display", DisplayForm)
+
+        message = str(excinfo.value)
+        for expected in ("testapp.Plain", "display", "DisplayForm"):
+            assert expected in message
+
     def test_a_model_without_the_field_is_refused(self) -> None:
         with pytest.raises(ImproperlyConfigured):
             PreferenceRegistry().register(Plain, "display", DisplayForm)

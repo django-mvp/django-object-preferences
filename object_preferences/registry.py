@@ -29,6 +29,18 @@ TEMPORAL_PARSERS = (
 )
 
 
+def dotted_path(form_class: type[forms.BaseForm]) -> str:
+    """Return the importable dotted path of a form class.
+
+    Args:
+        form_class: The form class to name.
+
+    Returns:
+        The class's module and qualified name.
+    """
+    return f"{form_class.__module__}.{form_class.__qualname__}"
+
+
 @dataclass(frozen=True)
 class PreferenceGroup:
     """A named form, declared by one app for one model, whose fields are preferences.
@@ -183,11 +195,19 @@ class PreferenceRegistry:
                 the name is taken, or the form has a field that refers to other
                 records or carries an upload.
         """
-        self.get_field(model)
-        if name in self.declarations.get(model, {}):
+        try:
+            self.get_field(model)
+        except ImproperlyConfigured as error:
+            raise ImproperlyConfigured(
+                f"Cannot register group {name!r} with {dotted_path(form_class)}: "
+                f"{error}"
+            ) from error
+        taken = self.declarations.get(model, {}).get(name)
+        if taken is not None:
             raise ImproperlyConfigured(
                 f"A preference group named {name!r} is already registered for "
-                f"{model._meta.label}."
+                f"{model._meta.label} with {dotted_path(taken.form_class)}, so "
+                f"{dotted_path(form_class)} cannot be registered under it."
             )
         for field_name, field in form_class().fields.items():
             if isinstance(field, UNSUPPORTED_FIELDS):
