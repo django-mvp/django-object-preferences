@@ -135,7 +135,7 @@
       "priority": "P1",
       "issue": 16,
       "worktree": null,
-      "status": "todo",
+      "status": "done",
       "replans": 0,
       "tasks": [
         {
@@ -166,7 +166,7 @@
               "uv run pytest -n auto --dist loadscope -q"
             ],
             "code": [
-              "tests/testapp/models.py:61"
+              "tests/testapp/models.py:51"
             ]
           }
         },

@@ -68,3 +68,10 @@ Did: README subsection Deciding who may use the page (warning, four mixin/querys
 Verified: pre-commit run --all-files passed. Examples mirror the routes tested in T007 except PermissionRequiredMixin, a plain Django mixin not run here.
 Next: full verify and report.
 Watch: none.
+
+## 2026-10-15T12:26:32Z · Forge · US2
+
+Did: accepted US2 (T005-T008), in-turn harness agent (sonnet) in dop-002-us2.
+Verified: receipts green; forge verify green on the merged branch (152 tests); makemigrations --check clean; tamper-check flags are additive (fixtures, factories, a test User model and its migration, routes; only import lines replaced).
+Next: US3.
+Watch: the README record-test example calls get_object() in test_func; US3 example must match the README verbatim.
