@@ -253,22 +253,7 @@ Carried into the implementation briefs rather than re-planned:
 - Messages raised for developer mistakes (`ImproperlyConfigured`, `KeyError`) are not translated.
   Article VIII covers user-facing strings, and these are developer-facing.
 
-## D6 — Stories are dispatched in-turn while gateway spawning is unavailable
-
-**Decision**: each story's implementer runs as an in-turn agent on the Sonnet tier, in its own
-worktree, with the usual brief, craft-skill gate, receipts check and independent re-verification.
-
-**Why**: on 2026-10-15 the gateway refused every subagent spawn from this session ("the selected
-account or native runtime is unavailable"), for every model. The orchestrating session was told.
-Running the implementers in-turn keeps the work on the tier the pipeline sets for it and keeps the
-builder separate from the one who accepts the story. What it loses is the per-story cost
-attribution, because the transcripts land with this session rather than under each worktree.
-
-**Revisit if**: spawning works again, at which point the remaining stories go back to it.
-
-**ADR:** none — a one-off workaround for a tooling outage, nothing in the package
-
-## D7 — Where preferences are stored, and how they are read
+## D6 — Where preferences are stored, and how they are read
 
 **Decision**: the spec's decisions on storage ("One field on the record holds only stored values",
 "The default comes from the field", "Reads come back typed", "Unknown keys are ignored, stale
@@ -282,7 +267,7 @@ preferences are not columns or rows.
 
 **ADR:** docs/adr/0001-preferences-are-stored-on-the-record.md
 
-## D8 — How preference groups are declared
+## D7 — How preference groups are declared
 
 **Decision**: the spec's decisions "A group is a Django form, registered like a model admin" and
 "Group names are unique per model, and clashes stop the project starting", with D1 and D3, are one
