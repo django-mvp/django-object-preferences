@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Projects</title>
+  </head>
+  <body>
+    <h1>Projects</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Project</th>
+          <th>Preferences read from the record</th>
+          <th>Stored on the record</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for project in object_list %}
+          <tr>
+            <td>{{ project.name }}</td>
+            <td>
+              {% for group, values in project.preferences.items %}
+                {% for preference, value in values.items %}
+                  <div>{{ group }}.{{ preference }}: {{ value }}</div>
+                {% endfor %}
+              {% endfor %}
+            </td>
+            <td>{{ project.preferences.stored }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </body>
+</html>

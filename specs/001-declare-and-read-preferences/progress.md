@@ -103,3 +103,10 @@ Did: RecordPreferences.save with tests.
 Verified: uv run pytest tests/test_fields.py, 56 passed; pre-commit and mypy clean.
 Next: T015 example project.
 Watch: the never-saved test wraps save in transaction.atomic because Django marks the surrounding test transaction for rollback when save raises.
+
+## 2026-10-15T11:26:08Z · Implementer US3 · T015
+
+Did: example project (manage.py, example/ app, seed_example, migration), ignores and deptry exclude.
+Verified: migrate OK, seed_example run twice gave 3 projects each time, check exit 0, curl of / on port 8317 returned 200 and listed the three projects with their stored dictionaries. Server stopped.
+Next: T016 README and CHANGELOG.
+Watch: none.

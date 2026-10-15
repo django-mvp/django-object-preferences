@@ -326,8 +326,16 @@
         },
         {
           "id": "T015",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv run python manage.py runserver 8317 --noreload; curl http://127.0.0.1:8317/ (HTTP 200)"
+            ],
+            "code": [
+              "example/preferences.py:11"
+            ]
+          }
         },
         {
           "id": "T016",
