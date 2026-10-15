@@ -260,6 +260,62 @@ from the form, so its stale values are cleared. Other groups are left alone.
 Renaming a preference therefore reads the new name's default until a person sets
 it again.
 
+## The preferences page
+
+`PreferencesView` is a page where a person changes a record's preferences. The
+package ships no URL, so you route it in your own `urls.py` and name the model
+with `as_view(model=...)`:
+
+```python
+# urls.py
+from django.urls import path
+from object_preferences.views import PreferencesView
+from projects.models import Project
+
+urlpatterns = [
+    path(
+        "projects/<int:pk>/preferences/",
+        PreferencesView.as_view(model=Project),
+        name="project-preferences",
+    ),
+]
+```
+
+It is a Django `DetailView`, so the record is found by `pk` or `slug`, an
+unknown record is a 404, and `queryset` or `get_queryset()` limits which
+records the page can open. The page shows every group declared for the model as
+a fieldset of its own, each control starting from the stored value or the
+default. A model with no preference field raises `ImproperlyConfigured` naming
+the model, and a record whose model declares no groups opens with no controls.
+
+Saving is all or nothing. The page validates every group with its own form. If
+any is invalid it saves nothing and shows the page again with the values the
+person entered and every error at once. Otherwise it applies each group and
+writes the preferences with one `save`, which touches no other field. Groups
+that declare a preference of the same name keep separate values, because each
+group's controls are prefixed with the group's name.
+
+After a save the person is sent back to the same page. Set `success_url` to
+send them elsewhere:
+
+```python
+PreferencesView.as_view(model=Project, success_url="/projects/")
+```
+
+A success message is added at the `SUCCESS` level when Django's messages
+framework is installed, and saving works without it. Change the wording with
+`success_message`.
+
+The page is the template `object_preferences/preferences_form.html`, a plain
+HTML document with no styling. To use your own, put a template of that name
+earlier on the template path, or set `template_name` on the view. It receives
+`record`, the record, and `forms`, a dictionary of each group's form by group
+name. Render each form inside its own `<fieldset>`, and include
+`{% csrf_token %}` in the `<form>`. The view checks the token itself, so a
+forged post is refused even when the CSRF middleware is not installed.
+
+The page applies no access rule of its own. Who may open it is yours to decide.
+
 ## Example project
 
 The repository holds a small Django project in `example/` that declares a

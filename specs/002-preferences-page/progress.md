@@ -26,3 +26,10 @@ Did: markup tests (label for each control, fieldset with one legend per group, a
 Verified: uv run pytest tests/test_views.py::TestPreferencesViewMarkup (3 passed); probe: replacing legend in the template fails the legend test; pre-commit passed.
 Next: T004 docs.
 Watch: the three tests passed on first run because the template from T001 and Django own form rendering already provide the markup; no production change in this task. The label and aria-describedby tests rest on Django rendering of the form.
+
+## 2026-10-15T12:20:16Z · Implementer US1 · T004
+
+Did: README "The preferences page", CHANGELOG Unreleased entry, CONTEXT.md term, regenerated the English catalogue with makemessages -l en.
+Verified: pre-commit run --all-files passed. No page under docs/ describes the view, so none needed changing.
+Next: full verify.
+Watch: none.
