@@ -40,3 +40,10 @@ Did: README Usage section (turning preferences on, quoting PreferencesField, Pre
 Verified: pre-commit all files clean; uv build --wheel lists object_preferences/locale/en/LC_MESSAGES/django.po.
 Next: full suite and report.
 Watch: no docs/ page describes anything this story touched.
+
+## 2026-10-15T11:17:57Z · Implementer US2 · T006
+
+Did: added registry.py (PreferenceGroup, PreferenceRegistry, registry, register) and the preference_registry fixture, tests first (ImportError red).
+Verified: uv run pytest tests/test_registry.py -x, 17 passed; pre-commit all files passed.
+Next: T007 discovery.
+Watch: git status after ledger/progress writes.
