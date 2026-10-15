@@ -2,7 +2,7 @@
   "feature": "001-declare-and-read-preferences",
   "branch": "001-declare-and-read-preferences",
   "repo": "django-mvp/django-object-preferences",
-  "state": "PR_READY",
+  "state": "MERGED",
   "state_history": [
     {
       "state": "QUEUED",
@@ -38,6 +38,11 @@
       "state": "PR_READY",
       "at": "2026-10-15T11:49:29Z",
       "note": "review applied; walkthrough laid out on #9; marking ready for review"
+    },
+    {
+      "state": "MERGED",
+      "at": "2026-10-15T12:02:13Z",
+      "note": "PR #9 merged; approved by forge-aeo-reviewer"
     }
   ],
   "gates": {
@@ -56,8 +61,8 @@
       ]
     },
     "merge": {
-      "approved_by": null,
-      "at": null
+      "approved_by": "forge-aeo-reviewer",
+      "at": "2026-10-15T12:02:09Z"
     },
     "design_review": {
       "approved_by": "design reviewer (one round)",
@@ -89,8 +94,8 @@
       ]
     },
     "walkthrough": {
-      "approved_by": null,
-      "at": "2026-10-15T11:49:19Z",
+      "approved_by": "forge-aeo-reviewer",
+      "at": "2026-10-15T12:02:09Z",
       "self_resolved": []
     }
   },
