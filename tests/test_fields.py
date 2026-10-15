@@ -94,6 +94,12 @@ class MomentForm(forms.Form):
     moment = forms.DateTimeField(required=False)
 
 
+class DayFirstForm(forms.Form):
+    day = forms.DateField(required=False, input_formats=["%d/%m/%Y"])
+    time = forms.TimeField(required=False, input_formats=["%H.%M"])
+    moment = forms.DateTimeField(required=False, input_formats=["%d/%m/%Y %H.%M"])
+
+
 class NamedForm(forms.Form):
     name = forms.CharField(initial="unnamed")
 
@@ -451,6 +457,23 @@ class TestRecordPreferences:
 
         with timezone.override("America/New_York"):
             assert reloaded.preferences["moments"]["moment"] == written
+
+    def test_temporal_values_read_back_when_the_field_accepts_no_iso_format(
+        self, project, preference_registry
+    ) -> None:
+        registry.register(Project, "dayfirst", DayFirstForm)
+        written = {
+            "day": datetime.date(2026, 3, 4),
+            "time": datetime.time(7, 15),
+            "moment": datetime.datetime(2026, 3, 4, 7, 15, tzinfo=datetime.UTC),
+        }
+        project.preferences.change("dayfirst", **written)
+        project.preferences.save()
+
+        reloaded = Project.objects.get(pk=project.pk)
+
+        with timezone.override("UTC"):
+            assert dict(reloaded.preferences["dayfirst"]) == written
 
     def test_changing_one_preference_keeps_the_groups_others(self, project) -> None:
         project.preferences = {"display": {"theme": "dark"}}

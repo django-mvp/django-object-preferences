@@ -192,6 +192,10 @@ showed that for a `forms.DateTimeField` it returns a naive datetime in the activ
 offset was lost and a read under another active timezone gave a different instant. The cleaned
 value through the encoder writes the offset. `forms.JSONField` stays the exception because its
 `clean()` parses text as JSON: a string value stored as-is would fall back to the default on read.
+A date, time or datetime field that declares `input_formats` without ISO cannot clean the ISO
+string the encoder stored (COR-003), so a read parses a stored string with
+`django.utils.dateparse` first and cleans the parsed object, which every temporal form field
+accepts whatever its `input_formats`.
 
 **Revisit if**: a field's encoded cleaned value turns out not to be valid input to its own
 `clean()`.

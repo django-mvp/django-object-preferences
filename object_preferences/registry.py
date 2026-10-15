@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any
 from django import forms
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db import models
+from django.utils.dateparse import parse_date, parse_datetime, parse_time
 
 if TYPE_CHECKING:
     from object_preferences.fields import PreferencesField
@@ -17,6 +18,14 @@ UNSUPPORTED_FIELDS = (
     forms.ModelChoiceField,
     forms.FileField,
     forms.MultiValueField,
+)
+
+# The encoder stores these as ISO strings, which a field with its own
+# input_formats may not accept, so they are parsed before the field cleans them.
+TEMPORAL_PARSERS = (
+    (forms.DateTimeField, parse_datetime),
+    (forms.DateField, parse_date),
+    (forms.TimeField, parse_time),
 )
 
 
@@ -81,7 +90,11 @@ class PreferenceGroup:
                 # Stored data is untrusted and cleaning can raise more than
                 # ValidationError, so no value may break a read (FR-016, SC-004).
                 with contextlib.suppress(Exception):
-                    values[name] = field.clean(stored[name])
+                    value = stored[name]
+                    for field_class, parser in TEMPORAL_PARSERS:
+                        if isinstance(field, field_class) and isinstance(value, str):
+                            value = parser(value) or value
+                    values[name] = field.clean(value)
         return values
 
     def to_stored(
