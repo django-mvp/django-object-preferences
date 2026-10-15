@@ -1,5 +1,14 @@
 # django-object-preferences
 
+[![Tests](https://github.com/django-mvp/django-object-preferences/actions/workflows/tests.yml/badge.svg)](https://github.com/django-mvp/django-object-preferences/actions/workflows/tests.yml)
+[![Build](https://github.com/django-mvp/django-object-preferences/actions/workflows/build.yml/badge.svg)](https://github.com/django-mvp/django-object-preferences/actions/workflows/build.yml)
+[![Publish](https://github.com/django-mvp/django-object-preferences/actions/workflows/publish.yml/badge.svg)](https://github.com/django-mvp/django-object-preferences/actions/workflows/publish.yml)
+[![codecov](https://codecov.io/gh/django-mvp/django-object-preferences/branch/main/graph/badge.svg)](https://codecov.io/gh/django-mvp/django-object-preferences)
+[![PyPI](https://img.shields.io/pypi/v/django-object-preferences)](https://pypi.org/project/django-object-preferences/)
+[![Python](https://img.shields.io/pypi/pyversions/django-object-preferences)](https://pypi.org/project/django-object-preferences/)
+[![Django](https://img.shields.io/pypi/djversions/django-object-preferences)](https://pypi.org/project/django-object-preferences/)
+[![License](https://img.shields.io/github/license/django-mvp/django-object-preferences)](https://github.com/django-mvp/django-object-preferences/blob/main/LICENSE)
+
 Preferences stored on any Django model instance, declared with forms.
 
 A person's theme, language and profile visibility, or how a project's or a
