@@ -33,16 +33,9 @@ Serves G1, G2 and G3.
 
 ### R2 — A page to change a record's preferences
 
-*feature · advances G4, G6*
+*delivered in [#8](https://github.com/django-mvp/django-object-preferences/issues/8) · advances G4, G6*
 
-Once preferences can be declared and read, people need somewhere to change them. This item gives every record a page listing the preference groups declared for its model, with the host project deciding where that page lives and who has permission to use it.
-
-**Deliverables:**
-
-- An editing page for one record that shows every preference group declared for its model and saves changes with full validation.
-- The host project decides who has permission to open the page for a given record, using Django's ordinary permission tools.
-- Documentation showing a host project pointing the page at the signed-in person, so people can change their own preferences.
-- Plain, accessible markup that works in any Django project without a user interface package.
+Each record has a page, `PreferencesView`, that shows every preference group declared for its model and saves them together with each group's own validation, so one invalid value saves nothing. A host project routes the page wherever it likes and restricts it with Django's ordinary access tools, because the page adds no rule of its own, and the README warns that a page routed with no rule is open to anyone. The README shows the common case of a page where each signed-in person changes their own preferences. The markup is a plain, accessible HTML page that needs no user interface package, and the example project shows both kinds of page behind a sign-in.
 
 Serves G4 and G6. Out of scope: styling for any particular user interface package, and admin integration.
 

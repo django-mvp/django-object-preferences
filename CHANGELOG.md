@@ -52,3 +52,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   A stored value that no longer fits reads the default, a stored preference or
   group that is no longer declared is ignored, and saving a group clears its
   stale values.
+- `PreferencesView`, a page where a person changes a record's preferences.
+  Route it with `PreferencesView.as_view(model=...)`. It shows every group
+  declared for the model, validates them all, and saves them together or not at
+  all. Afterwards it sends the person back to the same page, or to
+  `success_url`, and adds a success message when the messages framework is on.
+  The package ships no URL and the page applies no access rule of its own. Its
+  template, `object_preferences/preferences_form.html`, can be overridden.

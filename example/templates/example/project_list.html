@@ -5,6 +5,18 @@
     <title>Projects</title>
   </head>
   <body>
+    {% if user.is_authenticated %}
+      <p>
+        Signed in as {{ user.email }}.
+        <a href="{% url 'my-preferences' %}">Your preferences</a>
+      </p>
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Sign out</button>
+      </form>
+    {% else %}
+      <p><a href="{% url 'login' %}">Sign in</a></p>
+    {% endif %}
     <h1>Projects</h1>
     <table>
       <thead>
@@ -12,6 +24,7 @@
           <th>Project</th>
           <th>Preferences read from the record</th>
           <th>Stored on the record</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -26,6 +39,9 @@
               {% endfor %}
             </td>
             <td>{{ project.preferences.stored }}</td>
+            <td>
+              <a href="{% url 'project-preferences' project.pk %}">Preferences</a>
+            </td>
           </tr>
         {% endfor %}
       </tbody>

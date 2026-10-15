@@ -7,7 +7,7 @@ import uuid
 from django import forms
 
 from object_preferences.registry import register
-from tests.testapp.models import Project
+from tests.testapp.models import Project, User
 
 
 @register(Project, name="display")
@@ -33,3 +33,13 @@ class TypedForm(forms.Form):
         initial=uuid.UUID("12345678-1234-5678-1234-567812345678"), required=False
     )
     tags = forms.MultipleChoiceField(choices=[("a", "A"), ("b", "B")], required=False)
+
+
+@register(User, name="notifications")
+class NotificationsForm(forms.Form):
+    """How a person is told about changes."""
+
+    digest = forms.ChoiceField(
+        choices=[("daily", "Daily"), ("weekly", "Weekly")], initial="daily"
+    )
+    email_me = forms.BooleanField(required=False, initial=True)

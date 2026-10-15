@@ -2,6 +2,7 @@
 
 import uuid
 
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -45,6 +46,12 @@ class Plain(models.Model):
         help_text=_("What the record is called."),
         max_length=100,
     )
+
+
+class User(AbstractUser):
+    """A person who signs in and carries preferences."""
+
+    preferences = PreferencesField()
 
 
 class ProjectProxy(Project):

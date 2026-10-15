@@ -260,10 +260,184 @@ from the form, so its stale values are cleared. Other groups are left alone.
 Renaming a preference therefore reads the new name's default until a person sets
 it again.
 
+## The preferences page
+
+`PreferencesView` is a page where a person changes a record's preferences. The
+package ships no URL, so you route it in your own `urls.py` and name the model
+with `as_view(model=...)`:
+
+```python
+# urls.py
+from django.urls import path
+from object_preferences.views import PreferencesView
+from projects.models import Project
+
+urlpatterns = [
+    path(
+        "projects/<int:pk>/preferences/",
+        PreferencesView.as_view(model=Project),
+        name="project-preferences",
+    ),
+]
+```
+
+It is a Django `DetailView`, so the record is found by `pk` or `slug`, an
+unknown record is a 404, and `queryset` or `get_queryset()` limits which
+records the page can open. The page shows every group declared for the model as
+a fieldset of its own, each control starting from the stored value or the
+default. A model with no preference field raises `ImproperlyConfigured` naming
+the model, and a record whose model declares no groups opens with no controls.
+
+Saving is all or nothing. The page validates every group with its own form. If
+any is invalid it saves nothing and shows the page again with the values the
+person entered and every error at once. Otherwise it applies each group and
+writes the preferences with one `save`, which touches no other field. Groups
+that declare a preference of the same name keep separate values, because each
+group's controls are prefixed with the group's name.
+
+After a save the person is sent back to the same page. Set `success_url` to
+send them elsewhere:
+
+```python
+PreferencesView.as_view(model=Project, success_url="/projects/")
+```
+
+A success message is added at the `SUCCESS` level when Django's messages
+framework is installed, and saving works without it. Change the wording with
+`success_message`.
+
+The page is the template `object_preferences/preferences_form.html`, a plain
+HTML document with no styling. To use your own, put a template of that name
+earlier on the template path, or set `template_name` on the view. It receives
+`record`, the record, and `forms`, a dictionary of each group's form by group
+name. Render each form inside its own `<fieldset>`, and include
+`{% csrf_token %}` in the `<form>`. The view checks the token itself, so a
+forged post is refused even when the CSRF middleware is not installed.
+
+### Deciding who may use the page
+
+The page applies no access rule of its own. A page you route with no rule is
+open to anyone who can reach its address, who can then read and change that
+record's preferences. Decide who may use it before you route it.
+
+Because `PreferencesView` is an ordinary Django class-based view, Django's own
+tools do the deciding and refuse the way they always do. To require a signed-in
+person, add `LoginRequiredMixin` first:
+
+```python
+from django.contrib.auth.mixins import LoginRequiredMixin
+from object_preferences.views import PreferencesView
+
+
+class ProjectPreferencesView(LoginRequiredMixin, PreferencesView):
+    model = Project
+```
+
+To require a permission, use `PermissionRequiredMixin`. A person without it
+gets a 403 response, and an anonymous visitor is sent to sign in:
+
+```python
+from django.contrib.auth.mixins import PermissionRequiredMixin
+
+
+class ProjectPreferencesView(PermissionRequiredMixin, PreferencesView):
+    model = Project
+    permission_required = "projects.change_project"
+```
+
+To let a person change only some records, test them against the record with
+`UserPassesTestMixin`. Here only the person whose record it is may use the
+page:
+
+```python
+from django.contrib.auth.mixins import UserPassesTestMixin
+
+
+class OwnPreferencesView(UserPassesTestMixin, PreferencesView):
+    model = User
+
+    def test_func(self):
+        return self.request.user == self.get_object()
+```
+
+A test that looks the record up runs before the refusal, so a person who is
+refused can still tell a record that exists (403, or a redirect to sign in)
+from one that does not (404). Where that matters, limit the records in
+`get_queryset()` as below, and every record a person may not use is a 404.
+
+To limit which records the page can open at all, limit them in
+`get_queryset()`. A record outside the queryset is a 404:
+
+```python
+class OwnProjectPreferencesView(LoginRequiredMixin, PreferencesView):
+    model = Project
+
+    def get_queryset(self):
+        return Project.objects.filter(owner=self.request.user)
+```
+
+If you route the view with `as_view()` instead of subclassing it, wrap it with
+Django's decorators:
+
+```python
+from django.contrib.auth.decorators import login_required, permission_required
+
+path(
+    "projects/<int:pk>/preferences/",
+    login_required(
+        permission_required("projects.change_project", raise_exception=True)(
+            PreferencesView.as_view(model=Project)
+        )
+    ),
+    name="project-preferences",
+)
+```
+
+### A page for each person's own preferences
+
+The common case is a page where each signed-in person changes their own
+preferences, at one address with no record id. Return the signed-in person from
+`get_object()`, so the page needs no `model`, and require sign-in:
+
+```python
+from django.contrib.auth.mixins import LoginRequiredMixin
+from object_preferences.views import PreferencesView
+
+
+class MyPreferencesView(LoginRequiredMixin, PreferencesView):
+    """Show the signed-in person their own preferences."""
+
+    def get_object(self, queryset=None):
+        """Return the signed-in person as the record the page is for.
+
+        Args:
+            queryset: Unused, as the record is not looked up.
+
+        Returns:
+            The signed-in person.
+        """
+        return self.request.user
+```
+
+Route it at a path with no record id:
+
+```python
+# urls.py
+urlpatterns = [
+    path("preferences/", MyPreferencesView.as_view(), name="my-preferences"),
+]
+```
+
+Your user model must carry a `PreferencesField`, and the groups must be
+registered for it. An anonymous visitor is sent to `LOGIN_URL`, and a signed-in
+person can only ever reach their own record, because no other is looked up.
+
 ## Example project
 
-The repository holds a small Django project in `example/` that declares a
-group, reads it and changes it from code. From a checkout:
+The repository holds a small Django project in `example/`. It declares groups
+for a project and for a person, reads them, changes them from code, and routes
+both kinds of preferences page: a project's page behind a permission, and each
+person's own page. From a checkout:
 
 ```bash
 uv run python manage.py migrate
@@ -274,7 +448,20 @@ uv run python manage.py runserver
 Open the address it prints to see four projects, the preferences each one
 reads and the dictionary each one stores, which holds only what was changed.
 The last project stored a theme that the form no longer offers, so it reads the
-default theme while the stored column still shows the old value.
+default theme while the stored column still shows the old value. Each project
+links to its preferences page, and "Your preferences" opens the page for the
+person signed in.
+
+`seed_example` also creates four accounts, each with the password `password`:
+
+| Email | Who they are |
+| --- | --- |
+| `regular.user@example.com` | A person with no permissions. A project's page refuses them. |
+| `regular.user2@example.com` | The same, with a stored notification choice of their own. |
+| `staff.user@example.com` | May change projects, so may use a project's page. |
+| `super.user@example.com` | A superuser. |
+
+Running it again deletes and recreates the projects and the accounts.
 
 ## Contributing
 

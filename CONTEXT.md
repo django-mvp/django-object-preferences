@@ -30,6 +30,12 @@ under a name of its own. A group is declared with a Django form, and the form's
 fields are its preferences.
 _Avoid_: namespace, section, category, schema.
 
+**Preferences page**:
+The page where a person changes a record's preferences. It shows every
+preference group declared for the record's model and saves them together or not
+at all. A host project routes it and decides who may use it.
+_Avoid_: settings page, profile page, preferences form.
+
 **Default**:
 The value a preference has for every record that has not changed it. It comes
 from the declaring form's field, never from what is stored.

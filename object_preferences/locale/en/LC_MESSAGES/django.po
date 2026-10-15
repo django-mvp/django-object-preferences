@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-15 06:14-0500\n"
+"POT-Creation-Date: 2026-10-15 07:20-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,14 +17,32 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-#: apps.py:18
+
+#: apps.py:19
 msgid "Object Preferences"
 msgstr ""
 
-#: fields.py:65
+#: fields.py:201
 msgid "preferences"
 msgstr ""
 
-#: fields.py:66
+#: fields.py:202
 msgid "The preferences this record has changed from their defaults."
+msgstr ""
+
+#: templates/object_preferences/preferences_form.html:7
+msgid "Preferences"
+msgstr ""
+
+#: templates/object_preferences/preferences_form.html:11
+#, python-format
+msgid "Preferences for %(record)s"
+msgstr ""
+
+#: templates/object_preferences/preferences_form.html:25
+msgid "Save"
+msgstr ""
+
+#: views.py:35
+msgid "The preferences were saved."
 msgstr ""
