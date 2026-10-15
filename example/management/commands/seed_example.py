@@ -1,4 +1,4 @@
-"""Fill the example project's database with three projects."""
+"""Fill the example project's database with four projects."""
 
 from typing import Any
 
@@ -13,7 +13,7 @@ class Command(BaseCommand):
     help = "Delete and recreate the example projects."
 
     def handle(self, *args: Any, **options: Any) -> None:
-        """Create a project on defaults, one with changes and one changed back."""
+        """Create projects on defaults, changed, changed back and with a stale value."""
         Project.objects.all().delete()
 
         Project.objects.create(name="Left on defaults")
@@ -26,5 +26,9 @@ class Command(BaseCommand):
         changed_back.preferences.change("display", theme="dark")
         changed_back.preferences.change("display", theme="light")
         changed_back.preferences.save()
+
+        stale = Project.objects.create(name="Stored before the choices changed")
+        stale.preferences = {"display": {"theme": "sepia"}}
+        stale.save()
 
         self.stdout.write(f"Created {Project.objects.count()} example projects.")

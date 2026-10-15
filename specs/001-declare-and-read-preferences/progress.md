@@ -131,3 +131,10 @@ Did: Added the test that a stale stored value is gone after change() and save().
 Verified: uv run pytest tests/test_fields.py -k stale_stored_value_is_not_stored, 1 passed (1 failed with the T017 code removed); pre-commit run --all-files passed.
 Next: T019 example, README, CHANGELOG.
 Watch: none.
+
+## 2026-10-15T11:31:47Z · Implementer US4 · T019
+
+Did: seed_example adds a fourth project storing theme sepia, which the display form does not offer. README gains "Changing a declaration" and the example section says four projects. CHANGELOG entry under Unreleased.
+Verified: migrate, seed_example (4 projects) and check ran clean on a fresh sqlite file; the page fetched on port 8731 showed that project reading display.theme: light, page_size 25. Server stopped, db.sqlite3 removed.
+Next: full suite, pre-commit, mypy, report.
+Watch: none.

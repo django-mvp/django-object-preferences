@@ -48,3 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   rejects raises a `ValidationError` and leaves the record as it was.
 - An example project in `example/`, with a command that seeds it, showing a
   group declared, read and changed.
+- Changing a declaration is safe for records that already stored preferences.
+  A stored value that no longer fits reads the default, a stored preference or
+  group that is no longer declared is ignored, and saving a group clears its
+  stale values.

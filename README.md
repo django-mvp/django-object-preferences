@@ -228,6 +228,27 @@ drops stored keys that the group no longer declares. A `JSONField` preference is
 stored as the JSON text its form field shows, and reads back as the value you
 set.
 
+### Changing a declaration
+
+Records keep what they stored when you change a form, so removing, renaming or
+tightening a preference never needs a data migration. Reading never raises
+because of what is stored:
+
+- A stored value the field no longer accepts reads the default. That covers a
+  choice you removed, a number above a lowered maximum and a value of a changed
+  type.
+- A stored preference or group that is no longer declared is ignored. It stays
+  in the stored dictionary until its group is saved.
+- A stored dictionary, or a group's entry in it, that is not a dictionary reads
+  as if nothing were stored.
+- Values are read one by one, so a stored combination that the form's `clean()`
+  would now reject still reads value by value.
+
+Saving a group with `change` or `apply` rewrites that group's stored values
+from the form, so its stale values are cleared. Other groups are left alone.
+Renaming a preference therefore reads the new name's default until a person sets
+it again.
+
 ## Example project
 
 The repository holds a small Django project in `example/` that declares a
@@ -239,8 +260,10 @@ uv run python manage.py seed_example
 uv run python manage.py runserver
 ```
 
-Open the address it prints to see three projects, the preferences each one
+Open the address it prints to see four projects, the preferences each one
 reads and the dictionary each one stores, which holds only what was changed.
+The last project stored a theme that the form no longer offers, so it reads the
+default theme while the stored column still shows the old value.
 
 ## Contributing
 

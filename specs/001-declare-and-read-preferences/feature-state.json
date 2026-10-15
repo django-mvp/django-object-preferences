@@ -410,8 +410,16 @@
         },
         {
           "id": "T019",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "curl -s http://127.0.0.1:8731/ (runserver 8731 --noreload, stopped afterwards)"
+            ],
+            "code": [
+              "example/management/commands/seed_example.py:30"
+            ]
+          }
         }
       ]
     }
