@@ -230,8 +230,19 @@
         },
         {
           "id": "T010",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestPreferencesViewForOwnPreferences"
+            ],
+            "commands": [
+              "uv run python manage.py migrate && uv run python manage.py seed_example && uv run python manage.py check"
+            ],
+            "code": [
+              "example/views.py:1"
+            ]
+          }
         }
       ]
     }
