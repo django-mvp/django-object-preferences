@@ -262,8 +262,19 @@
       "tasks": [
         {
           "id": "T011",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_an_unbound_form_starts_from_the_records_current_values,tests/test_fields.py::TestRecordPreferences::test_a_form_given_data_is_bound_and_validates_it"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -x -q -k form"
+            ],
+            "code": [
+              "object_preferences/fields.py:55"
+            ]
+          }
         },
         {
           "id": "T012",

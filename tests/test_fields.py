@@ -211,3 +211,43 @@ class TestRecordPreferences:
         assert isinstance(values, MappingProxyType)
         with pytest.raises(TypeError):
             values["theme"] = "dark"
+
+    def test_an_unbound_form_starts_from_the_records_current_values(
+        self, project
+    ) -> None:
+        project.preferences = {"display": {"page_size": 40}}
+
+        form = project.preferences.get_form("display")
+
+        assert not form.is_bound
+        assert form.initial == {
+            "theme": "light",
+            "page_size": 40,
+            "show_archived": False,
+        }
+
+    def test_a_form_given_data_is_bound_and_validates_it(self, project) -> None:
+        data = {"theme": "dark", "page_size": "3"}
+
+        form = project.preferences.get_form("display", data=data)
+
+        assert form.is_bound
+        assert form.has_error("page_size", code="min_value")
+        assert form.cleaned_data["theme"] == "dark"
+
+    def test_an_initial_passed_in_wins_over_the_current_value(self, project) -> None:
+        form = project.preferences.get_form("display", initial={"theme": "dark"})
+
+        assert form.initial["theme"] == "dark"
+        assert form.initial["page_size"] == 25
+
+    def test_other_keyword_arguments_reach_the_form(self, project) -> None:
+        form = project.preferences.get_form("display", prefix="display")
+
+        assert form.prefix == "display"
+
+    def test_a_form_for_an_undeclared_group_is_a_key_error_naming_it(
+        self, project
+    ) -> None:
+        with pytest.raises(KeyError, match="missing"):
+            project.preferences.get_form("missing")

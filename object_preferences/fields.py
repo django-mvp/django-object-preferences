@@ -4,6 +4,7 @@ from collections.abc import Iterator, Mapping, Sequence
 from types import MappingProxyType
 from typing import Any
 
+from django import forms
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.db.models.query_utils import DeferredAttribute
@@ -52,6 +53,28 @@ class RecordPreferences(Mapping[str, Mapping[str, Any]]):
         """
         group = registry.get_group(type(self.record), name)
         return MappingProxyType(group.read(self.stored.get(name, {})))
+
+    def get_form(
+        self, name: str, /, data: Mapping[str, Any] | None = None, **kwargs: Any
+    ) -> forms.BaseForm:
+        """Return one group's form, starting from the record's current values.
+
+        Args:
+            name: The group's name.
+            data: Submitted data to bind the form to. The form is unbound when
+                omitted.
+            **kwargs: Further keyword arguments for the form. An ``initial``
+                is laid over the record's current values.
+
+        Returns:
+            An instance of the group's form.
+
+        Raises:
+            KeyError: If no group of that name is declared for the record's model.
+        """
+        group = registry.get_group(type(self.record), name)
+        initial = {**self[name], **kwargs.pop("initial", {})}
+        return group.form_class(data=data, initial=initial, **kwargs)
 
     def __iter__(self) -> Iterator[str]:
         """Iterate over the names of the groups declared for the record's model."""

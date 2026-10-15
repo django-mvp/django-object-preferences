@@ -75,3 +75,10 @@ Did: README sections on declaring, looking up and reading groups, where a defaul
 Verified: uv run pre-commit run --all-files passed. No other page under docs/ documents a name or behaviour this story touched.
 Next: full suite, pre-commit, mypy, report.
 Watch: none.
+
+## 2026-10-15T11:23:33Z · Implementer US3 · T011
+
+Did: RecordPreferences.get_form with tests.
+Verified: uv run pytest tests/test_fields.py -k form, 5 passed; pre-commit and mypy clean.
+Next: T012 to_stored and apply.
+Watch: none.
