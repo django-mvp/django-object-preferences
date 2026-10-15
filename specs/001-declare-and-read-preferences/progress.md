@@ -19,3 +19,10 @@ Did: PreferencesField with defaults and minimal deconstruct; Project carries the
 Verified: uv run pytest tests/test_fields.py -q, 5 passed; pre-commit and mypy clean.
 Next: T003 descriptor and RecordPreferences.
 Watch: autodetector test uses a graph with a stand-in 0001 node because changes() drops apps absent from the graph.
+
+## 2026-10-15T11:14:06Z · Implementer US1 · T003
+
+Did: RecordPreferences (record, field, stored), PreferencesDescriptor, the three unwrapping methods on the field via one static unwrap().
+Verified: uv run pytest tests/test_fields.py -q, 14 passed; mutation probe of each unwrapping method: get_prep_value and to_python and value_from_object each fail a test when removed; pre-commit and mypy clean.
+Next: T004 migration.
+Watch: none.

@@ -100,8 +100,19 @@
         },
         {
           "id": "T003",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -q"
+            ],
+            "code": [
+              "object_preferences/fields.py:35"
+            ]
+          }
         },
         {
           "id": "T004",

@@ -60,3 +60,64 @@ class TestPreferencesField:
         form_class = forms.modelform_factory(Project, fields="__all__")
 
         assert "preferences" not in form_class.base_fields
+
+
+class TestRecordPreferences:
+    def test_a_new_record_stores_nothing(self) -> None:
+        record = Project(name="New")
+
+        assert record.preferences.stored == {}
+
+    def test_a_record_reloaded_from_the_database_stores_nothing(self, project) -> None:
+        reloaded = Project.objects.get(pk=project.pk)
+
+        assert reloaded.preferences.stored == {}
+
+    def test_it_knows_its_record_and_its_field(self, project) -> None:
+        accessor = project.preferences
+
+        assert accessor.record is project
+        assert accessor.field is Project._meta.get_field("preferences")
+
+    def test_a_stored_dictionary_assigned_to_the_attribute_is_saved(
+        self, project
+    ) -> None:
+        project.preferences = {"display": {"theme": "dark"}}
+        project.save()
+
+        reloaded = Project.objects.get(pk=project.pk)
+        assert reloaded.preferences.stored == {"display": {"theme": "dark"}}
+
+    def test_assigning_the_accessor_of_another_record_copies_its_stored_dictionary(
+        self, project
+    ) -> None:
+        other = Project(name="Other")
+        other.preferences = {"display": {"theme": "dark"}}
+
+        project.preferences = other.preferences
+
+        assert project.preferences.stored == {"display": {"theme": "dark"}}
+
+    def test_saving_a_record_assigned_an_accessor_stores_the_dictionary(
+        self, project
+    ) -> None:
+        other = Project(name="Other")
+        other.preferences = {"display": {"theme": "dark"}}
+        project.preferences = other.preferences
+        project.save()
+
+        reloaded = Project.objects.get(pk=project.pk)
+        assert reloaded.preferences.stored == {"display": {"theme": "dark"}}
+
+    def test_full_clean_passes_on_a_record(self, project) -> None:
+        project.full_clean()
+
+    def test_a_deferred_value_is_loaded_when_it_is_read(self, project) -> None:
+        deferred = Project.objects.defer("preferences").get(pk=project.pk)
+
+        assert deferred.preferences.stored == {}
+
+    def test_the_field_reads_the_stored_dictionary_from_a_record(self, project) -> None:
+        field = Project._meta.get_field("preferences")
+
+        assert field.value_from_object(project) == {}
