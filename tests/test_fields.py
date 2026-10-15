@@ -13,6 +13,7 @@ from django.db import transaction
 from django.db.migrations.autodetector import MigrationAutodetector
 from django.db.migrations.graph import MigrationGraph
 from django.db.migrations.state import ProjectState
+from django.utils import timezone
 
 from object_preferences.fields import PreferencesField
 from object_preferences.registry import registry
@@ -87,6 +88,10 @@ class ChangedDisplayForm(forms.Form):
 
 class NotesForm(forms.Form):
     notes = forms.JSONField(required=False)
+
+
+class MomentForm(forms.Form):
+    moment = forms.DateTimeField(required=False)
 
 
 class NamedForm(forms.Form):
@@ -433,6 +438,19 @@ class TestRecordPreferences:
 
         reloaded = Project.objects.get(pk=project.pk)
         assert reloaded.preferences["notes"]["notes"] == "hello"
+
+    def test_a_datetime_reads_as_the_instant_written_under_another_timezone(
+        self, project, preference_registry
+    ) -> None:
+        registry.register(Project, "moments", MomentForm)
+        written = datetime.datetime(2026, 3, 4, 12, 0, tzinfo=datetime.UTC)
+        with timezone.override("Pacific/Auckland"):
+            project.preferences.change("moments", moment=written)
+            project.preferences.save()
+        reloaded = Project.objects.get(pk=project.pk)
+
+        with timezone.override("America/New_York"):
+            assert reloaded.preferences["moments"]["moment"] == written
 
     def test_changing_one_preference_keeps_the_groups_others(self, project) -> None:
         project.preferences = {"display": {"theme": "dark"}}

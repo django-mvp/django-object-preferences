@@ -143,9 +143,9 @@ Probed in the installed Django, every field type the spec names round-trips thro
 `DjangoJSONEncoder` and back through `field.clean()` to an equal value: date, time, duration,
 decimal, UUID, multiple choice, typed choice and boolean. A datetime loses its microseconds below
 the millisecond, which the encoder truncates. A `forms.JSONField` round-trips an object, a list or a
-number but not a string, because its `clean()` parses text as JSON. Storing each value as the
-field's `prepare_value()` gives it (JSON text for a `forms.JSONField`, the value itself for the
-others) closes that gap (`decisions.md` D2). ISO dates and times parse whatever the
+number but not a string, because its `clean()` parses text as JSON. Storing a
+`forms.JSONField` value as its `prepare_value()` (JSON text) and every other cleaned value through
+the encoder closes that gap (`decisions.md` D2). ISO dates and times parse whatever the
 active locale because `get_format` appends `ISO_INPUT_FORMATS` (`utils/formats.py:19,133`).
 
 **Stale and malformed data never raises** (FR-016, FR-017, SC-004). Cleaning a value of the wrong

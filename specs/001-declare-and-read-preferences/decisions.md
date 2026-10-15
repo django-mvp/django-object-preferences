@@ -179,20 +179,22 @@ covers it with one input.
 **ADR:** none — a narrowing of which form fields are accepted, recorded in the README and in the
 error itself
 
-## D2 — Values are stored as the form field would render them
+## D2 — Values are stored cleaned, as JSON
 
-**Decision**: a changed value is stored as the field's `prepare_value()` gives it, then encoded
-with `DjangoJSONEncoder`. A change from code binds the form with the same rendering of each current
-value.
+**Decision**: a changed value is stored as its cleaned value run through `DjangoJSONEncoder`, so a
+datetime keeps its offset. The one exception is `forms.JSONField`, whose value is stored as the
+field's `prepare_value()` (its JSON text). A change from code still binds the form with
+`prepare_value()` of each current value, which happens inside one call under one active timezone.
 
-**Why**: reading a value back runs it through the field's `clean()`, which takes a value in the
-shape a form submission has. For most fields that is the value itself. For `forms.JSONField` it is
-JSON text: a string value stored as-is would be parsed as JSON on read and fall back to the
-default. `prepare_value()` is the field's own answer to "what does my value look like as form
-data", so using it keeps one rule for every field instead of a special case.
+**Why**: the first rule stored `prepare_value()` for every field, on the reasoning that it is the
+field's own answer to "what does my value look like as form data". The code review (COR-001)
+showed that for a `forms.DateTimeField` it returns a naive datetime in the active timezone, so the
+offset was lost and a read under another active timezone gave a different instant. The cleaned
+value through the encoder writes the offset. `forms.JSONField` stays the exception because its
+`clean()` parses text as JSON: a string value stored as-is would fall back to the default on read.
 
-**Revisit if**: a field's `prepare_value()` turns out to return something that is not valid input
-to its own `clean()`.
+**Revisit if**: a field's encoded cleaned value turns out not to be valid input to its own
+`clean()`.
 
 **ADR:** none — an internal detail of how values are stored, invisible to a host project
 

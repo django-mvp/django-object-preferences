@@ -90,7 +90,7 @@ class PreferenceGroup:
         """Return what a valid form of the group leaves stored on a record.
 
         Only values that differ from their default are kept, in the form the
-        database returns them, so that the record reads the same before and
+        database returns them (the cleaned value, run through the encoder), so that the record reads the same before and
         after it is saved.
 
         Args:
@@ -105,9 +105,12 @@ class PreferenceGroup:
         for name, field in form.fields.items():
             value = form.cleaned_data[name]
             if value != defaults[name]:
-                stored[name] = json.loads(
-                    json.dumps(field.prepare_value(value), cls=encoder)
-                )
+                # A JSONField value is kept as its JSON text, so a plain string
+                # reads back as itself. Every other value goes through the encoder
+                # whole, which keeps a datetime's offset.
+                if isinstance(field, forms.JSONField):
+                    value = field.prepare_value(value)
+                stored[name] = json.loads(json.dumps(value, cls=encoder))
         return stored
 
 
