@@ -158,8 +158,19 @@
         },
         {
           "id": "T029",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -q"
+            ],
+            "code": [
+              "tests/test_fields.py:119"
+            ]
+          }
         }
       ]
     },
@@ -284,18 +295,51 @@
         },
         {
           "id": "T025",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_temporal_values_read_back_when_the_field_accepts_no_iso_format"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py tests/test_registry.py -q"
+            ],
+            "code": [
+              "object_preferences/registry.py:95"
+            ]
+          }
         },
         {
           "id": "T027",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_registry.py::TestPreferenceRegistry::test_a_duplicate_name_error_names_the_model_the_name_and_both_forms,tests/test_registry.py::TestPreferenceRegistry::test_a_model_without_the_field_error_names_the_model_group_and_form"
+            ],
+            "commands": [
+              "uv run pytest tests/test_registry.py tests/test_fields.py -q"
+            ],
+            "code": [
+              "object_preferences/registry.py:165"
+            ]
+          }
         },
         {
           "id": "T028",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_apps.py::TestObjectPreferencesConfig::test_no_line_of_the_module_exceeds_the_org_line_length"
+            ],
+            "commands": [
+              "uv run pytest tests/test_apps.py -q"
+            ],
+            "code": [
+              "object_preferences/apps.py:23"
+            ]
+          }
         }
       ]
     },
@@ -415,13 +459,35 @@
         },
         {
           "id": "T024",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_a_datetime_reads_as_the_instant_written_under_another_timezone"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py tests/test_registry.py -q"
+            ],
+            "code": [
+              "object_preferences/registry.py:100"
+            ]
+          }
         },
         {
           "id": "T026",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_fields.py::TestRecordPreferences::test_saving_a_record_with_a_default_key_that_was_never_saved_raises"
+            ],
+            "commands": [
+              "uv run pytest tests/test_fields.py -q"
+            ],
+            "code": [
+              "object_preferences/fields.py:132"
+            ]
+          }
         }
       ]
     },
