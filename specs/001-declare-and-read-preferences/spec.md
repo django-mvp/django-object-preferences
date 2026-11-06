@@ -169,6 +169,29 @@ longer fit, and read every preference without an error.
 
 ---
 
+### User Story 5 - A developer reads a record's preferences without knowing what its field is called (Priority: P2)
+
+A developer writing an installed app reads the preferences of a record from a model the app does
+not own, such as the signed-in person. The host project may have named the model's preferences
+field anything, for example because `preferences` was already taken. The developer asks the
+registry for the record's preferences and gets them, without naming the field.
+
+**Why this priority**: an app is only reusable across projects if it can reach the preferences
+it declared on a model it does not own (G1).
+
+**Independent Test**: give a model a preferences field with a name other than `preferences`, and
+read a record's preferences through the registry.
+
+**Acceptance Scenarios**:
+
+1. **Given** a record whose preferences field has any name, **When** a developer asks the registry
+   for the record's preferences, **Then** they get the same preferences the field's attribute
+   returns.
+2. **Given** a record whose model carries no preferences field, **When** a developer asks the
+   registry for its preferences, **Then** the call fails with an error naming the model.
+
+---
+
 ### Edge Cases
 
 - Two installed apps declare a group with the same name for the same model: the project refuses
@@ -228,6 +251,8 @@ longer fit, and read every preference without an error.
   that refers to other records or carries uploads. Each error names what is wrong and where. *(US2)*
 - **FR-020**: The README MUST show a preference group declared, read and changed, and the
   repository MUST include a small example project doing the same. *(US2, US3)*
+- **FR-021**: A developer MUST be able to read a record's preferences without knowing what the
+  record's preferences field is called. *(US5)*
 
 ### Key Entities
 

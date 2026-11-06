@@ -9,11 +9,11 @@ from django import forms
 from django.core.exceptions import ImproperlyConfigured
 from django.core.serializers.json import DjangoJSONEncoder
 
-from object_preferences.fields import PreferencesField
+from object_preferences.fields import PreferencesField, RecordPreferences
 from object_preferences.registry import PreferenceGroup, PreferenceRegistry
 from object_preferences.registry import register as register_group
 from object_preferences.registry import registry as default_registry
-from tests.testapp.models import Plain, Project
+from tests.testapp.models import Dataset, Plain, Project
 from tests.testapp.preferences import DisplayForm as ProjectDisplayForm
 from tests.testapp.preferences import TypedForm
 
@@ -157,6 +157,29 @@ class TestPreferenceRegistry:
     def test_get_field_refuses_a_model_without_the_field(self) -> None:
         with pytest.raises(ImproperlyConfigured):
             PreferenceRegistry().get_field(Plain)
+
+    def test_get_preferences_returns_a_records_preferences(self) -> None:
+        project = Project(name="Atlas")
+
+        preferences = PreferenceRegistry().get_preferences(project)
+
+        assert isinstance(preferences, RecordPreferences)
+        assert preferences.record is project
+        assert preferences.field is Project._meta.get_field("preferences")
+
+    def test_get_preferences_finds_a_field_of_any_name(self) -> None:
+        dataset = Dataset(name="Survey")
+
+        preferences = PreferenceRegistry().get_preferences(dataset)
+
+        assert preferences.record is dataset
+        assert preferences.field is Dataset._meta.get_field("options")
+
+    def test_get_preferences_refuses_a_record_without_the_field(self) -> None:
+        with pytest.raises(ImproperlyConfigured) as excinfo:
+            PreferenceRegistry().get_preferences(Plain(name="Plain"))
+
+        assert "testapp.Plain" in str(excinfo.value)
 
     def test_an_undeclared_group_is_a_key_error_naming_it_and_the_model(self) -> None:
         with pytest.raises(KeyError) as excinfo:
