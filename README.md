@@ -199,8 +199,8 @@ preferences = registry.get_preferences(request.user)
 list(preferences)  # the groups declared for the user model
 ```
 
-`get_preferences` returns the same `RecordPreferences` the field's attribute
-does, so everything below works on it too. It raises `ImproperlyConfigured`,
+`get_preferences` returns a `RecordPreferences`, exactly as reading the field's
+attribute does, so everything below works on it too. It raises `ImproperlyConfigured`,
 naming the model, when the record's model has no `PreferencesField`.
 
 ### Changing preferences from code
