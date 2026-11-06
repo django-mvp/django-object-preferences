@@ -25,7 +25,7 @@ Everything needed to reach a minimum usable release.
 
 ### R1 — Preferences declared for a model and read from its records
 
-*delivered in [#7](https://github.com/django-mvp/django-object-preferences/issues/7) · advances G1, G2, G3*
+*delivered in [#7](https://github.com/django-mvp/django-object-preferences/issues/7), [#27](https://github.com/django-mvp/django-object-preferences/issues/27) · advances G1, G2, G3*
 
 A host project turns preferences on for a model it owns by adding one field, at the cost of one migration. Any installed app declares a named group of preferences for that model with an ordinary Django form in its `preferences.py`, and the package finds it at start-up. Every record reads its preferences without a database query, typed as the form's fields produce them. A preference nobody changed reads its current default, and stored values that no longer fit read the default instead of raising. Code changes and saves preferences with the form's own validation. The README and a small example project show all of it, and the editing page and everything after it build on this.
 
