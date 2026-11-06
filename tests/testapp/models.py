@@ -48,6 +48,17 @@ class Plain(models.Model):
     )
 
 
+class Dataset(models.Model):
+    """A record whose preferences field is not called ``preferences``."""
+
+    name = models.CharField(
+        verbose_name=_("name"),
+        help_text=_("What the dataset is called."),
+        max_length=100,
+    )
+    options = PreferencesField()
+
+
 class User(AbstractUser):
     """A person who signs in and carries preferences."""
 

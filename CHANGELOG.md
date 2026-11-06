@@ -22,6 +22,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `registry.get_preferences(record)` returns a record's preferences whatever
+  its `PreferencesField` is called, so an app can read the preferences of a
+  model it does not own without assuming the field's name.
+
 ## [v0.1.0] - 2026-10-15
 
 ### Added

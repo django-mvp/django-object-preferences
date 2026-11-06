@@ -12,7 +12,7 @@ from django.db import models
 from django.utils.dateparse import parse_date, parse_datetime, parse_time
 
 if TYPE_CHECKING:
-    from object_preferences.fields import PreferencesField
+    from object_preferences.fields import PreferencesField, RecordPreferences
 
 UNSUPPORTED_FIELDS = (
     forms.ModelChoiceField,
@@ -189,6 +189,24 @@ class PreferenceRegistry:
                 f"to carry preferences, but has {len(fields)}."
             )
         return fields[0]
+
+    def get_preferences(self, record: models.Model) -> "RecordPreferences":
+        """Return a record's preferences, whatever its preferences field is called.
+
+        Args:
+            record: The record to read.
+
+        Returns:
+            The record's ``RecordPreferences``.
+
+        Raises:
+            ImproperlyConfigured: If the record's model has no single
+                preferences field.
+        """
+        preferences: RecordPreferences = getattr(
+            record, self.get_field(record._meta.model).attname
+        )
+        return preferences
 
     def register(
         self, model: type[models.Model], name: str, form_class: type[forms.BaseForm]

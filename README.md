@@ -149,6 +149,7 @@ from object_preferences.registry import registry
 registry.get_groups(Project)           # every PreferenceGroup, in registration order
 registry.get_group(Project, "display")  # one group, or a KeyError naming it
 registry.get_field(Project)             # the model's PreferencesField
+registry.get_preferences(project)       # a record's preferences, whatever the field is called
 ```
 
 Groups belong to exactly the model they were registered for. A subclass or a
@@ -182,6 +183,25 @@ gives a `datetime.date` and a `DecimalField` a `decimal.Decimal`, although the
 record stores them as JSON. Change a field's `initial` and every record that has
 not stored its own value reads the new default, with no migration and no data
 change.
+
+### Reading preferences from an app that does not own the model
+
+The field can have any name. A project whose user model already has a
+`preferences` attribute for something else can call its field `settings` or
+`options`, and the package finds it by its type. So an app that reads the
+preferences of a model it does not own, such as the signed-in person, should
+not assume the name. Ask the registry for the record's preferences instead:
+
+```python
+from object_preferences.registry import registry
+
+preferences = registry.get_preferences(request.user)
+list(preferences)  # the groups declared for the user model
+```
+
+`get_preferences` returns the same `RecordPreferences` the field's attribute
+does, so everything below works on it too. It raises `ImproperlyConfigured`,
+naming the model, when the record's model has no `PreferencesField`.
 
 ### Changing preferences from code
 

@@ -43,11 +43,7 @@ class PreferencesView(DetailView):
         Raises:
             ImproperlyConfigured: If the record's model has no preferences field.
         """
-        model = self.object._meta.model
-        preferences: RecordPreferences = getattr(
-            self.object, registry.get_field(model).attname
-        )
-        return preferences
+        return registry.get_preferences(self.object)
 
     def get_forms(self, data: Any = None) -> dict[str, BaseForm]:
         """Build the form of every group, prefixed with the group's name.
