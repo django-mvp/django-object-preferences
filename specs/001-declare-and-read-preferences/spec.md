@@ -220,7 +220,8 @@ read a record's preferences through the registry.
 - **FR-003**: Declaring, changing or removing a preference group MUST NOT need a migration. *(US1)*
 - **FR-004**: An installed app MUST be able to declare a named preference group for a model with
   an ordinary Django form, registered against the model in the way a model admin is registered.
-  *(US2)*
+  It MAY give the group a translatable verbose name, which is what people see the group called;
+  without one, the group is called by its name with a capital first letter. *(US2)*
 - **FR-005**: The package MUST find every group declared by an installed app without the host
   project listing it. *(US2)*
 - **FR-006**: Reading a preference from a record already loaded MUST make no database query.
@@ -257,8 +258,8 @@ read a record's preferences through the registry.
 ### Key Entities
 
 - **Record**: one instance of a model that carries preferences. It holds its own stored values.
-- **Preference group**: a named Django form declared by one installed app for one model. Its
-  fields are its preferences.
+- **Preference group**: a named Django form declared by one installed app for one model, with a
+  verbose name people see it called. Its fields are its preferences.
 - **Preference**: one field of a group's form, with its type, validation and default.
 - **Default**: the value a preference reads for a record with nothing stored for it, taken from
   the declaring field.

@@ -126,3 +126,10 @@ ignore_missing_model_attributes = "True"
 
 [tool.deptry]
 extend_exclude = ["tests/", "docs/", "example/"]
+
+[tool.forge.docs]
+# The design discussion the package started from, and the contributor
+# standards. Neither documents the package's interface for adopters: they name
+# Django's own `admin.register` and similar for comparison, so they are not
+# checked as pages describing the current code.
+record-paths = ["docs/brainstorm.md", "docs/contributing/"]

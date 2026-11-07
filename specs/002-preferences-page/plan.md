@@ -86,8 +86,8 @@ The shape is the contract; names and docstrings follow the code-documentation st
 - `get_preferences()` uses `_meta.model` so a `SimpleLazyObject` user works (research.md). A model
   without a `PreferencesField` raises `ImproperlyConfigured` from `registry.get_field()` on first
   use, naming the model (FR-018). GET reaches it through `get_context_data()`.
-- `forms` maps each group name to its form, in registration order (FR-002, D7). The template uses
-  the name for the legend.
+- `forms` maps each group name to its form, in registration order (FR-002, D7). `groups` pairs
+  each group with its form, and the template uses the group's `verbose_name` for the legend.
 - `forms_valid()` applies and saves once (N2, FR-004, FR-005). `save()` writes only the
   preferences (FR-010). A model with no groups saves an unchanged dictionary, which changes
   nothing.
@@ -108,7 +108,7 @@ The shape is the contract; names and docstrings follow the code-documentation st
 (no `extends`, no `include`), `{% load i18n %}`, `lang` from `get_current_language`, a heading
 naming the record, the `messages` list when present (`role="status"`), and a
 `<form method="post">` with `{% csrf_token %}`, one `<fieldset>` per group with a `<legend>` of
-the group name capitalised and `{{ form }}` inside, and a submit button. Every fixed string is
+the group's verbose name and `{{ form }}` inside, and a submit button. Every fixed string is
 translated.
 
 ## Tests

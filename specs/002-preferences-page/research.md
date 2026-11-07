@@ -67,10 +67,9 @@ Radio and checkbox groups get a `<fieldset>` with a `<legend>`. Errors that belo
 field render at the top of that group's form. The template adds one `<fieldset>` and `<legend>`
 per group around `{{ form }}`, and nothing else is needed.
 
-**What the legend says.** A group has a name and no human label in FS-001. The legend shows the
-name with its first letter capitalised. Adding a label to the group would be new public API that
-nothing here asks for; a project that wants different words overrides the template, and R4 is
-where named restyling points arrive.
+**What the legend says.** The legend shows the group's `verbose_name`, which is its name with
+the first letter capitalised when the project gives none (ADR 0004). R4 is where named restyling
+points arrive.
 
 **A page with no base template (FR-016).** A Django project has no standard base template, so a
 package template that extends one fails in a project that lacks it. The package's template is a

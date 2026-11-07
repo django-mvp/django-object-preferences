@@ -131,10 +131,27 @@ class DisplayPreferences(forms.Form):
     show_archived = forms.BooleanField(required=False)
 ```
 
-`register` is the decorator form of `registry.register(model, name, form_class)`,
-where `registry` is the project-wide `PreferenceRegistry`. A group's name is
-unique for its model. Registering returns a `PreferenceGroup`, which knows its
-`model`, its `name` and its `form_class`.
+`register` is the decorator form of
+`registry.register(model, name, form_class, verbose_name="")`, where `registry`
+is the project-wide `PreferenceRegistry`. A group's name is unique for its
+model. Registering returns a `PreferenceGroup`, which knows its `model`, its
+`name`, its `form_class` and its `verbose_name`.
+
+The name is an identifier: it is the group's key in `record.preferences` and
+the prefix of its controls on a page. What people see the group called is its
+`verbose_name`, which you can mark for translation the way you would a model's.
+Without one, the group is called by its name with a capital first letter, so
+the group above is "Display":
+
+```python
+# projects/preferences.py, continued
+from django.utils.translation import gettext_lazy as _
+
+
+@register(Project, name="locale", verbose_name=_("Language and region"))
+class LocalePreferences(forms.Form):
+    language = forms.ChoiceField(choices=[("en", _("English")), ("de", _("German"))])
+```
 
 Startup stops with an `ImproperlyConfigured` error that names the problem when
 two groups for one model share a name, when the model has no `PreferencesField`,
@@ -329,8 +346,21 @@ framework is installed, and saving works without it. Change the wording with
 The page is the template `object_preferences/preferences_form.html`, a plain
 HTML document with no styling. To use your own, put a template of that name
 earlier on the template path, or set `template_name` on the view. It receives
-`record`, the record, and `forms`, a dictionary of each group's form by group
-name. Render each form inside its own `<fieldset>`, and include
+`record`, the record, `forms`, a dictionary of each group's form by group
+name, and `groups`, a list of each `PreferenceGroup` paired with its form, in
+the same order. Render each form inside its own `<fieldset>`, headed by the
+group's `verbose_name`:
+
+```django
+{% for group, form in groups %}
+  <fieldset>
+    <legend>{{ group.verbose_name }}</legend>
+    {{ form }}
+  </fieldset>
+{% endfor %}
+```
+
+Include
 `{% csrf_token %}` in the `<form>`. The view checks the token itself, so a
 forged post is refused even when the CSRF middleware is not installed.
 

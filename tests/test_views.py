@@ -393,6 +393,21 @@ class TestPreferencesViewMarkup:
         assert len(fieldsets) == len(response.context["forms"])
         assert all(len(elements(fieldset, "legend")) == 1 for fieldset in fieldsets)
 
+    def test_each_groups_legend_is_its_verbose_name(
+        self, client, user, preference_registry
+    ) -> None:
+        register(User, name="locale", verbose_name="Language and region")(
+            type("LocaleForm", (forms.Form,), {"note": forms.CharField(required=False)})
+        )
+        client.force_login(user)
+
+        response = client.get(reverse("own-preferences"))
+
+        legends = [
+            "".join(legend.children) for legend in elements(page(response), "legend")
+        ]
+        assert legends == ["Notifications", "Language and region"]
+
     def test_an_invalid_control_points_at_the_element_that_holds_its_error(
         self, client, project
     ) -> None:

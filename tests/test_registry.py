@@ -8,6 +8,8 @@ import pytest
 from django import forms
 from django.core.exceptions import ImproperlyConfigured
 from django.core.serializers.json import DjangoJSONEncoder
+from django.utils.functional import Promise
+from django.utils.translation import gettext_lazy
 
 from object_preferences.fields import PreferencesField, RecordPreferences
 from object_preferences.registry import PreferenceGroup, PreferenceRegistry
@@ -90,6 +92,44 @@ class TestPreferenceRegistry:
         assert default_registry.get_group(Project, "decorated").form_class is (
             DisplayForm
         )
+
+    def test_a_group_carries_the_verbose_name_it_is_registered_with(self) -> None:
+        registry = PreferenceRegistry()
+
+        group = registry.register(
+            Project, "display", DisplayForm, verbose_name="Look and feel"
+        )
+
+        assert group.verbose_name == "Look and feel"
+
+    def test_the_decorator_passes_the_verbose_name_on(
+        self, preference_registry
+    ) -> None:
+        register_group(Project, name="decorated", verbose_name="Decorated")(DisplayForm)
+
+        assert default_registry.get_group(Project, "decorated").verbose_name == (
+            "Decorated"
+        )
+
+    def test_a_group_without_a_verbose_name_is_called_by_its_capitalised_name(
+        self,
+    ) -> None:
+        registry = PreferenceRegistry()
+
+        group = registry.register(Project, "display", DisplayForm)
+
+        assert group.verbose_name == "Display"
+
+    def test_a_lazy_verbose_name_is_translated_when_read_not_when_registered(
+        self,
+    ) -> None:
+        registry = PreferenceRegistry()
+
+        group = registry.register(
+            Project, "display", DisplayForm, verbose_name=gettext_lazy("Display")
+        )
+
+        assert isinstance(group.verbose_name, Promise)
 
     def test_a_duplicate_name_on_one_model_is_refused(self) -> None:
         registry = PreferenceRegistry()
