@@ -137,17 +137,16 @@ already provide.
 
 **ADR:** none — how the specification was split into stories
 
-## D12. A group's legend is its name, not translated text
+## D12. A group's legend is its verbose name
 
-**Chosen:** each group on the page is headed by the group's registered name with a capital first
-letter.
+**Chosen:** each group on the page is headed by the group's `verbose_name`, which is its name
+with a capital first letter when the project gives none.
 
-**Why:** FS-001 gives a group a name and no human label, and adding one would be public API that
-nothing in this specification asks for. The name is the host project's own text, chosen in its
-own code, so FR-017 (text the page itself shows) does not reach it. A project that wants
-different words overrides the template. Raised by the design review (SPEC-002, low).
+**Why:** the verbose name is the host project's own text, chosen and marked for translation in its
+own code, so FR-017 (text the page itself shows) does not reach it. Raised by the design review
+(SPEC-002, low).
 
-**ADR:** none — a template detail a project overrides; restyling points are R4
+**ADR:** [ADR 0004](../../docs/adr/0004-a-preference-group-has-a-verbose-name.md)
 
 ## D13. The example project gains accounts and both kinds of page
 

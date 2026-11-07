@@ -10,6 +10,8 @@ from django import forms
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db import models
 from django.utils.dateparse import parse_date, parse_datetime, parse_time
+from django.utils.functional import Promise
+from django.utils.text import capfirst
 
 if TYPE_CHECKING:
     from object_preferences.fields import PreferencesField, RecordPreferences
@@ -37,11 +39,15 @@ class PreferenceGroup:
         model: The model whose records carry the group.
         name: The group's name, unique for the model.
         form_class: The form that declares the group's preferences.
+        verbose_name: What people see the group called, such as the heading
+            of its part of a page. The name with its first letter capitalised
+            when not given.
     """
 
     model: type[models.Model]
     name: str
     form_class: type[forms.BaseForm]
+    verbose_name: str | Promise = ""
 
     def defaults(self, form: forms.BaseForm | None = None) -> dict[str, Any]:
         """Return what each preference reads when nothing is stored for it.
@@ -209,7 +215,11 @@ class PreferenceRegistry:
         return preferences
 
     def register(
-        self, model: type[models.Model], name: str, form_class: type[forms.BaseForm]
+        self,
+        model: type[models.Model],
+        name: str,
+        form_class: type[forms.BaseForm],
+        verbose_name: str | Promise = "",
     ) -> PreferenceGroup:
         """Declare a group of preferences for a model.
 
@@ -217,6 +227,9 @@ class PreferenceRegistry:
             model: The model whose records carry the group.
             name: The group's name, unique for the model.
             form_class: The form whose fields are the group's preferences.
+            verbose_name: What people see the group called, usually marked for
+                translation with ``gettext_lazy``. The name with its first
+                letter capitalised when omitted.
 
         Returns:
             The registered group.
@@ -246,7 +259,7 @@ class PreferenceRegistry:
                     f"{type(field).__name__}, which cannot be a preference in "
                     f"group {name!r} of {model._meta.label}."
                 )
-        group = PreferenceGroup(model, name, form_class)
+        group = PreferenceGroup(model, name, form_class, verbose_name or capfirst(name))
         self.declarations.setdefault(model, {})[name] = group
         return group
 
@@ -286,13 +299,15 @@ registry = PreferenceRegistry()
 
 
 def register(
-    model: type[models.Model], *, name: str
+    model: type[models.Model], *, name: str, verbose_name: str | Promise = ""
 ) -> Callable[[type[forms.Form]], type[forms.Form]]:
     """Register the decorated form as a preference group of the module registry.
 
     Args:
         model: The model whose records carry the group.
         name: The group's name, unique for the model.
+        verbose_name: What people see the group called. The name with its first
+            letter capitalised when omitted.
 
     Returns:
         A decorator that registers the form and returns it unchanged.
@@ -300,7 +315,7 @@ def register(
 
     def decorator(form_class: type[forms.Form]) -> type[forms.Form]:
         """Register the form and hand it back."""
-        registry.register(model, name, form_class)
+        registry.register(model, name, form_class, verbose_name)
         return form_class
 
     return decorator

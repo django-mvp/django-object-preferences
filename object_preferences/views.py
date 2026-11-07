@@ -62,9 +62,18 @@ class PreferencesView(DetailView):
         }
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        """Add the forms of the record's groups unless they were passed in."""
+        """Add the forms of the record's groups unless they were passed in.
+
+        ``groups`` pairs each group with its form, so a template can head the
+        form with the group's ``verbose_name``.
+        """
         if "forms" not in kwargs:
             kwargs["forms"] = self.get_forms()
+        model = self.object._meta.model
+        kwargs["groups"] = [
+            (registry.get_group(model, name), form)
+            for name, form in kwargs["forms"].items()
+        ]
         return super().get_context_data(**kwargs)
 
     def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:

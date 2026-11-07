@@ -16,9 +16,9 @@
       {% endif %}
       <form method="post">
         {% csrf_token %}
-        {% for name, form in forms.items %}
+        {% for group, form in groups %}
           <fieldset>
-            <legend>{{ name|capfirst }}</legend>
+            <legend>{{ group.verbose_name }}</legend>
             {{ form }}
           </fieldset>
         {% endfor %}

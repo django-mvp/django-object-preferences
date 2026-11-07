@@ -22,6 +22,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- A preference group can be given a `verbose_name`, the translatable name
+  people see it called: `@register(User, name="locale",
+  verbose_name=_("Language and region"))`, or the same argument to
+  `registry.register()`. `PreferenceGroup.verbose_name` holds it, and is the
+  group's name with a capital first letter when none is given, so existing
+  groups read exactly as before.
+- The preferences page heads each group with its `verbose_name`, and its
+  template receives `groups`, each `PreferenceGroup` paired with its form, so a
+  template of your own can do the same.
+
 ## [v0.2.0] - 2026-11-06
 
 ### Added
