@@ -1,6 +1,7 @@
 """The preferences a project and a person carry."""
 
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 from example.models import Project, User
 from object_preferences.registry import register
@@ -17,7 +18,7 @@ class DisplayPreferences(forms.Form):
     show_archived = forms.BooleanField(required=False)
 
 
-@register(User, name="display")
+@register(User, name="display", verbose_name=_("Appearance"))
 class PersonDisplayPreferences(forms.Form):
     """How the site looks to a person."""
 
