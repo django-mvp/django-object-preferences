@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.3.0] - 2026-11-07
+
 ### Added
 
 - A preference group can be given a `verbose_name`, the translatable name
