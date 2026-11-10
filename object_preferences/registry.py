@@ -118,6 +118,10 @@ class PreferenceGroup:
     ) -> Any:
         """Return a cleaned value as the database returns it once stored.
 
+        A value the encoder cannot serialize, such as the ``ZoneInfo`` a
+        timezone field cleans to, is stored as its text instead: what the field
+        shows in its widget, which the field cleans back to the value on read.
+
         Args:
             field: The form field the value was cleaned by.
             value: The cleaned value.
@@ -125,13 +129,30 @@ class PreferenceGroup:
 
         Returns:
             The value after a round trip through JSON.
+
+        Raises:
+            TypeError: If the encoder cannot serialize the value and the field
+                does not clean its text back to the same value.
         """
         # A JSONField value is kept as its JSON text, so a plain string reads
         # back as itself. Every other value goes through the encoder whole,
         # which keeps a datetime's offset.
         if isinstance(field, forms.JSONField):
             value = field.prepare_value(value)
-        return json.loads(json.dumps(value, cls=encoder))
+        try:
+            return json.loads(json.dumps(value, cls=encoder))
+        except TypeError as error:
+            unencodable = error
+        text = str(field.prepare_value(value))
+        # Text the field never produced can make cleaning raise anything.
+        with contextlib.suppress(Exception):
+            if field.clean(text) == value:
+                return text
+        raise TypeError(
+            f"{type(field).__name__} cleaned to {value!r}, which the JSON encoder "
+            f"cannot serialize and the field does not clean back from its text "
+            f"{text!r}, so it cannot be stored."
+        ) from unencodable
 
     def to_stored(
         self, form: forms.BaseForm, encoder: type[json.JSONEncoder] | None

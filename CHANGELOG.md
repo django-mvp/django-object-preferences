@@ -22,6 +22,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- A preference whose field cleans to a value JSON cannot encode can be saved.
+  Such a value, like the `zoneinfo.ZoneInfo` that django-timezone-field's
+  `TimeZoneFormField` gives, is stored as its text and cleaned again when read,
+  so it still reads back as the type its field produces. Saving one used to
+  raise `TypeError: Object of type ZoneInfo is not JSON serializable`. A value
+  whose field does not clean its own text back to it still raises a
+  `TypeError` on save, now naming the field and the value.
+
 ## [v0.3.0] - 2026-11-07
 
 ### Added

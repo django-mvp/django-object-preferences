@@ -201,6 +201,15 @@ record stores them as JSON. Change a field's `initial` and every record that has
 not stored its own value reads the new default, with no migration and no data
 change.
 
+A value the field's JSON encoder cannot serialize is stored as its text instead,
+the way the form shows it, and the field cleans that text again when it is read.
+So a `TimeZoneFormField` from django-timezone-field, which cleans to a
+`zoneinfo.ZoneInfo`, stores the timezone's name and reads back as a `ZoneInfo`.
+Whether a value differs from its default is decided on the cleaned values, so a
+timezone left at its default stores nothing. A field whose value can be stored
+neither way, because the field does not clean its own text back to the same
+value, raises a `TypeError` when `change` or `apply` stores it.
+
 ### Reading preferences from an app that does not own the model
 
 The field can have any name. A project whose user model already has a

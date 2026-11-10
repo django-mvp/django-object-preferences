@@ -2,14 +2,17 @@
 
 import datetime
 import decimal
+import fractions
 import uuid
+import zoneinfo
 
 import pytest
 from django import forms
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.functional import Promise
 from django.utils.translation import gettext_lazy
+from timezone_field import TimeZoneFormField
 
 from object_preferences.fields import PreferencesField, RecordPreferences
 from object_preferences.registry import PreferenceGroup, PreferenceRegistry
@@ -48,6 +51,42 @@ class LateModelChoiceForm(forms.Form):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.fields["project"] = forms.ModelChoiceField(queryset=Project.objects.all())
+
+
+class FractionField(forms.CharField):
+    """Cleans to a fraction, which the JSON encoder cannot serialize."""
+
+    def to_python(self, value):
+        value = super().to_python(value)
+        if not value:
+            return None
+        try:
+            return fractions.Fraction(value)
+        except ValueError:
+            raise ValidationError("Enter a fraction.", code="invalid") from None
+
+
+class Opaque:
+    """A value with no text a field could clean back to it."""
+
+
+class OpaqueField(forms.Field):
+    """Cleans anything given to it to a new, unequal value."""
+
+    def to_python(self, value):
+        return Opaque() if value else None
+
+
+class RatioForm(forms.Form):
+    ratio = FractionField(initial="1/2")
+
+
+class TimeZoneForm(forms.Form):
+    zone = TimeZoneFormField(initial="UTC")
+
+
+class OpaqueForm(forms.Form):
+    thing = OpaqueField(required=False)
 
 
 class TestPreferenceRegistry:
@@ -397,3 +436,56 @@ class TestPreferenceGroup:
         values = group.read({"low": 20, "high": 5}, DjangoJSONEncoder)
 
         assert values == {"low": 20, "high": 5}
+
+    @pytest.mark.parametrize(
+        ("form_class", "name", "text"),
+        [(TimeZoneForm, "zone", "Europe/Berlin"), (RatioForm, "ratio", "2/3")],
+    )
+    def test_a_value_json_cannot_encode_is_stored_as_its_text(
+        self, form_class, name, text
+    ) -> None:
+        group = PreferenceGroup(Project, "group", form_class)
+        form = form_class({name: text})
+        assert form.is_valid()
+
+        assert group.to_stored(form, DjangoJSONEncoder) == {name: text}
+
+    @pytest.mark.parametrize(
+        ("form_class", "name", "text", "value"),
+        [
+            (TimeZoneForm, "zone", "Europe/Berlin", zoneinfo.ZoneInfo("Europe/Berlin")),
+            (RatioForm, "ratio", "2/3", fractions.Fraction(2, 3)),
+        ],
+    )
+    def test_a_value_stored_as_its_text_reads_as_the_type_its_field_produces(
+        self, form_class, name, text, value
+    ) -> None:
+        group = PreferenceGroup(Project, "group", form_class)
+
+        read = group.read({name: text}, DjangoJSONEncoder)[name]
+
+        assert read == value
+        assert type(read) is type(value)
+
+    @pytest.mark.parametrize(
+        ("form_class", "name", "text"),
+        [(TimeZoneForm, "zone", "UTC"), (RatioForm, "ratio", "1/2")],
+    )
+    def test_a_value_json_cannot_encode_left_at_its_default_is_not_stored(
+        self, form_class, name, text
+    ) -> None:
+        group = PreferenceGroup(Project, "group", form_class)
+        form = form_class({name: text})
+        assert form.is_valid()
+
+        assert group.to_stored(form, DjangoJSONEncoder) == {}
+
+    def test_a_value_neither_json_nor_its_text_can_hold_raises_a_type_error(
+        self,
+    ) -> None:
+        group = PreferenceGroup(Project, "opaque", OpaqueForm)
+        form = OpaqueForm({"thing": "anything"})
+        assert form.is_valid()
+
+        with pytest.raises(TypeError, match="OpaqueField"):
+            group.to_stored(form, DjangoJSONEncoder)

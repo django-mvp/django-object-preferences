@@ -52,6 +52,9 @@ include = ["/object_preferences", "/README.md", "/LICENSE"]
 # pytest, pytest-django, pytest-xdist, factory-boy, coverage and django-stubs.
 dev = [
     "mvp-shared[dev,test]",
+    # A form field that cleans to a value JSON cannot encode, for the tests of
+    # how such values are stored. The package itself does not use it.
+    "django-timezone-field>=7.2.2",
 ]
 
 [tool.uv.sources]
