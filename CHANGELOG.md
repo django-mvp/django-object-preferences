@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.3.1] - 2026-11-10
+
 ### Fixed
 
 - A preference whose field cleans to a value JSON cannot encode can be saved.
