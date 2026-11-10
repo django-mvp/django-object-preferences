@@ -2,6 +2,7 @@
 
 import datetime
 import decimal
+import zoneinfo
 from types import MappingProxyType
 
 import pytest
@@ -14,6 +15,7 @@ from django.db.migrations.autodetector import MigrationAutodetector
 from django.db.migrations.graph import MigrationGraph
 from django.db.migrations.state import ProjectState
 from django.utils import timezone
+from timezone_field import TimeZoneFormField
 
 from object_preferences.fields import PreferencesField
 from object_preferences.registry import registry
@@ -89,6 +91,10 @@ class ChangedDisplayForm(forms.Form):
 
 class NotesForm(forms.Form):
     notes = forms.JSONField(required=False)
+
+
+class RegionForm(forms.Form):
+    zone = TimeZoneFormField(initial="UTC")
 
 
 class MomentForm(forms.Form):
@@ -461,6 +467,33 @@ class TestRecordPreferences:
 
         reloaded = Project.objects.get(pk=project.pk)
         assert reloaded.preferences["notes"]["notes"] == "hello"
+
+    def test_a_timezone_preference_survives_a_save_and_reload(
+        self, project, preference_registry
+    ) -> None:
+        registry.register(Project, "region", RegionForm)
+        form = project.preferences.get_form("region", {"zone": "Europe/Berlin"})
+
+        project.preferences.apply("region", form)
+        project.save()
+
+        reloaded = Project.objects.get(pk=project.pk)
+        assert reloaded.preferences["region"]["zone"] == zoneinfo.ZoneInfo(
+            "Europe/Berlin"
+        )
+
+    def test_a_timezone_preference_left_at_its_default_stores_nothing(
+        self, project, preference_registry
+    ) -> None:
+        registry.register(Project, "region", RegionForm)
+        form = project.preferences.get_form("region", {"zone": "UTC"})
+
+        project.preferences.apply("region", form)
+        project.save()
+
+        reloaded = Project.objects.get(pk=project.pk)
+        assert not reloaded.preferences.stored.get("region")
+        assert reloaded.preferences["region"]["zone"] == zoneinfo.ZoneInfo("UTC")
 
     def test_a_datetime_reads_as_the_instant_written_under_another_timezone(
         self, project, preference_registry
